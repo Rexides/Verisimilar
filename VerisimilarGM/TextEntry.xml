@@ -1,0 +1,172 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+<Frame name="VGMTextEntryFrame" hidden="true" toplevel="true" frameStrata="DIALOG" parent="UIParent" movable="true" enableMouse="true">
+        <Size>
+		<AbsDimension x="500" y="600"/>
+	</Size>
+        <Anchors>
+                <Anchor point="CENTER"/>
+        </Anchors>
+        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+                <TileSize>
+                        <AbsValue val="32"/>
+                </TileSize>
+                <EdgeSize>
+                        <AbsValue val="32"/>
+                </EdgeSize>
+                <BackgroundInsets>
+                        <AbsInset left="11" right="12" top="12" bottom="11"/>
+                </BackgroundInsets>
+        </Backdrop>
+	<Layers>
+		<Layer level="ARTWORK">
+			<FontString name="$parentTitle" hidden="false" inherits="GameFontNormal" text="">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parent" relativePoint="TOP">
+						<Offset>
+							<AbsDimension x="5" y="-20"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</FontString>
+			
+			<FontString name="$parentCodeSign" hidden="false" inherits="GameFontNormal" text="Code">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="30" y="-105"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</FontString>
+				
+		</Layer>
+	</Layers>
+	<Frames>
+		
+		<ScrollFrame name="$parentScrollFrameCode" inherits="UIPanelScrollFrameTemplate">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+					<Offset>
+						<AbsDimension x="30" y="-130"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+					<Offset>
+						<AbsDimension x="-40" y="60"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+			<ScrollChild>
+				<EditBox name="$parentEditBoxCode" multiLine="true" autoFocus="false">
+					<Size>
+						<AbsDimension x="430" y="500"/>
+					</Size>
+					<Scripts>
+						<OnTextChanged>
+							local scrollBar = getglobal(self:GetParent():GetName().."ScrollBar")
+							local min;
+							local max;
+							min, max = scrollBar:GetMinMaxValues();
+							if ( max > 0 and (self.max ~= max) ) then
+								self.max = max;
+								scrollBar:SetValue(max);
+							end
+						</OnTextChanged>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+					</Scripts>
+					<FontString inherits="GameFontHighlightSmall"/>
+				</EditBox>
+			</ScrollChild>
+		</ScrollFrame>
+		<Button name="$parentTextButton">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="$parentScrollFrameCode" relativePoint="TOPLEFT"/>
+				<Anchor point="BOTTOMRIGHT" relativeTo="$parentScrollFrameCode" relativePoint="BOTTOMRIGHT" />
+			</Anchors>
+			<Scripts>
+				<OnClick>
+					getglobal(self:GetParent():GetName().."ScrollFrameCodeEditBoxCode"):SetFocus();
+				</OnClick>
+			</Scripts>
+		</Button>
+		<Frame name="$parentTextBackground">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="$parentScrollFrameCode" relativePoint="TOPLEFT">
+					<Offset>
+						<AbsDimension x="-10" y="10"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="BOTTOMRIGHT" relativeTo="$parentScrollFrameCode" relativePoint="BOTTOMRIGHT">
+					<Offset>
+						<AbsDimension x="5" y="-10"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+			<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+				<EdgeSize>
+					<AbsValue val="16"/>
+				</EdgeSize>
+				<TileSize>
+					<AbsValue val="16"/>
+				</TileSize>
+				<BackgroundInsets>
+					<AbsInset left="5" right="5" top="5" bottom="5"/>
+				</BackgroundInsets>
+			</Backdrop>
+			<Scripts>
+				<OnLoad>
+					
+					self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
+					self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+				</OnLoad>
+			</Scripts>
+		</Frame>
+		<Button name="$parentCloseButton" inherits="UIPanelButtonTemplate" text="Close">
+		        <Size>
+				<AbsDimension x="80" y="22"/>
+		        </Size>
+		        <Anchors>
+		                <Anchor point="BOTTOM">
+					<Offset>
+						<AbsDimension x="40" y="20" />
+					</Offset>
+				</Anchor>
+		        </Anchors>
+		        <Scripts>
+				<OnClick> self:GetParent():Hide();</OnClick>
+			</Scripts>
+		</Button>
+		<Button name="$parentSaveButton" inherits="UIPanelButtonTemplate" text="Save">
+		        <Size>
+				<AbsDimension x="80" y="22"/>
+		        </Size>
+		        <Anchors>
+		                <Anchor point="BOTTOM">
+					<Offset>
+						<AbsDimension x="-40" y="20" />
+					</Offset>
+				</Anchor>
+		        </Anchors>
+		        <Scripts>
+				
+				<OnClick>
+					local window=self:GetParent();
+					local text=getglobal(window:GetName().."ScrollFrameCodeEditBoxCode"):GetText();
+					window.handler(text);
+					window:Hide();
+				</OnClick>
+			</Scripts>
+		</Button>
+	</Frames>
+	<Scripts>
+		<OnMouseDown> self:StartMoving();  </OnMouseDown>
+		<OnMouseUp>  self:StopMovingOrSizing();	</OnMouseUp>
+		<OnDragStop> self:StopMovingOrSizing(); </OnDragStop>
+		<OnEscapePressed>	</OnEscapePressed>
+	</Scripts>
+  </Frame>
+ </Ui>

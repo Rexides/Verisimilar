@@ -1,0 +1,32 @@
+Introduction
+Have you ever wanted to run an adventure in WoW, like you did when playing Dungeons and Dragons, or any other tabletop game? You can do it in the game, but you have to make a lot of compromises. You could pretend to be an NPC using your characters, but the players would still see that they interact with their old buddy.
+
+Verisimilar helps you create that sense of immersion that's sometimes hard to achieve when running your own storylines. It allows the Game Master (GM, and when used in the context of the add-on it does not mean the Blizzard GMs, but the player running their own storylines) to enhance the players' game world, by modifying already existing assets, creating new ones, and interacting with the players through them.
+
+Other than storylines, you can also use it for other occasions that could benefit from a little world enhancing. For example, if you are running a tavern, you could give your NPC bartender more gossip options to develop his personality, or even converse with the customers through him. Or a leader of a military guild could give out that day's duties as custom quests.
+
+Features:
+-Create quests, quest chains, "meta-quests"
+-Create items that can be rewards or requirements to quests, or even provide scripted actions
+-Add custom items as loot to existing mobs
+-Speak through NPCs
+-Add gossip options and quests to NPCs
+
+Legality and Limits
+This add-on is completely legal in accordance with the Blizzard add-on policy. It does not add or modify game assets found in the .mpq files. That also means that there are a lot of limitations to what it can do. You cannot, for example, add the 3D model of a character to the game world, much less be able to fight it.
+
+You can, however, affect most of his interaction with the game world that happens through the user interface.
+
+Verisimilar and other Add-ons
+Unfortunately, due to the nature of Verisimilar, it does not function well when there are other add-ons present that try to modify or affect the same assets. For example, it will not work with any custom quest log add-ons (like Quest Guru, for example, but it WILL work with Quest Helper). Also, while working seemingly fine, SpamSentry will block the NPC speech, even if you have that option disabled in the add-on. However, you can disable Verisimilar's ability to merge with the interface (and conflict with other add-ons) through it's options page. This, however, will result in a sub-par experience for you, as it will try to interact with the player through other, less verisimilar ways. I suggest that you give it a chance though, and try it with the other add-ons disabled at least once.
+
+The Verisimilar Suite
+This is actually a two-part add-on. The zip you downloaded contains the Verisimilar Player and Verisimilar GM add-ons.
+
+Verisimilar Player is what normal players will use. It is what affects their interface and brings the GMs vision to life.
+
+Verisimilar GM is the toolbox that the GM uses to construct and orchestrate his world.
+
+You will find detailed guides for both add-ons in their respective folders
+
+Made by Erethas (Moonglade EU)

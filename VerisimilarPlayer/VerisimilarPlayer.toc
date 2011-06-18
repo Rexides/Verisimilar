@@ -1,0 +1,33 @@
+## Interface: 40000
+## Title: VerisimilarPlayer
+## Author: Erethas (Moonglade EU)
+## Version: 0.16
+## Notes: Enchance your RP experience!
+## eMail: rexides@gmail.com
+## X-Email: rexides@gmail.com
+## SavedVariables: VerisimilarPlDB
+## OptionalDeps: Ace3
+## X-Embeds: Ace3
+## X-Category: Miscellaneous
+## DefaultState: Enabled
+
+embeds.xml
+VPLMainFrame.xml
+MinimapButton.xml
+VPLItemTextFrame.xml
+VPLcore.lua
+CommonData.lua
+VPLInterface.lua
+VPLCommunication.lua
+NPCStubs.lua
+QuestStubs.lua
+ItemStubs.lua
+MobStubs.lua
+AreaStubs.lua
+VPLSessionPanel.lua
+VPLEnvironmentPanel.lua
+VPLQuestPanel.lua
+VPLInventoryPanel.lua
+VPLMinimapMagic.lua
+
+

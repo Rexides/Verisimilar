@@ -1,0 +1,79 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+	<Button name="VerisimilarMinimapButton" toplevel="true" movable="true" parent="Minimap"> 
+		<Size>
+			<AbsDimension x="32" y="32"/>
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="Minimap" relativePoint="BOTTOMLEFT">
+				<Offset>
+					<AbsDimension x="15" y="15"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<NormalTexture file="Interface\AddOns\VerisimilarPlayer\Images\Interface\MMButton"/>
+		<PushedTexture file="Interface\AddOns\VerisimilarPlayer\Images\Interface\MMButton"/>
+		<HighlightTexture alphaMode="ADD" file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight"/>
+		<Scripts>
+			<OnLoad>
+				local VSdewdrop= AceLibrary("Dewdrop-2.0");
+				VSdewdrop:Register(self,'children',function()
+														local menuTable={};
+	
+														menuTable[1]={text="Toggle Player Panel"}
+														if (IsAddOnLoaded("VerisimilarPlayer")) then
+															menuTable[1].func=VerisimilarPl.ToggleMainWindow;
+														else
+															menuTable[1].disabled=true;
+														end
+														
+														menuTable[2]={text="Toggle GM Panel"}
+														if(IsAddOnLoaded("VerisimilarGM"))then
+															menuTable[2].func=VerisimilarGM.ToggleMainWindow;
+														else
+															menuTable[2].disabled=true;
+														end
+														
+														if (IsAddOnLoaded("VerisimilarPlayer") and IsAddOnLoaded("VerisimilarGM"))then
+															menuTable[3]={text="Default Open:",
+																					isTitle=true};
+															menuTable[4]={text="Player Panel",
+																					func=function()
+																						VerisimilarMinimapButton.openDefault="Player";
+																						VerisimilarPl.db.char.MMBOpenDefault="Player";
+									
+																						end,
+																					checked=(VerisimilarMinimapButton.openDefault=="Player")};
+															menuTable[5]={text="GM Panel",
+																					func=function()
+																						VerisimilarMinimapButton.openDefault="GM";
+																						VerisimilarPl.db.char.MMBOpenDefault="GM";
+																						
+																						end,
+																					checked=(VerisimilarMinimapButton.openDefault=="GM")};
+														end
+														tinsert(menuTable, {text="Options",func=function()InterfaceOptionsFrame_OpenToCategory(VerisimilarPl.optionsFrame);end})
+														 VSdewdrop:FeedTable(menuTable);
+														
+													end
+									);
+														
+			</OnLoad>
+			<OnClick>
+				
+				if(self.openDefault=="Player")then
+					VerisimilarPl:ToggleMainWindow();
+				else
+					VerisimilarGM:ToggleMainWindow();
+				end
+			</OnClick>
+			<OnMouseDown> self:StartMoving();  </OnMouseDown>
+			<OnMouseUp>  self:StopMovingOrSizing();	</OnMouseUp>
+			<OnDragStop> self:StopMovingOrSizing(); </OnDragStop>
+		</Scripts>
+	</Button>
+	
+</Ui>
+
+

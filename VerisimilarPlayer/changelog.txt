@@ -1,0 +1,182 @@
+v0.16
+
+-(VPL)Right clicking on items in the Verisimilar inventory panel will now work again.
+
+-(VGM)Keeping player data between logouts is now the default option for new sessions.
+
+-(VGM)All your sessions will now be common between all characters in your account. Player data for each session is common between characters in the same realm and faction, and individual sessions are enabled/disabled, declared local and toggle keeping player info per character.
+
+-(VGM)The element ID naming rules (of v0.15) will actually be enforced in this version (PS I am an idiot).
+
+-(VGM)There is now a limit of 255 sessions per account, and 255 elements per session (not counting scripts).
+
+-(VPL)Your own sessions will be automatically be added to your VPL session list (no longer required to querry yourself)
+
+-(Scripts)Helper function "SendSessionMessage" is now called "SendTextMessage"
+
+-(Scripts)The Use script of items no longer uses the distance input. You instead choose the interact distance from the interface. If distance is set to "self", then only the "x" and "y" input are valid, the rest are nil.
+
+-(VGM)A sixty-character limit is not applied on session names (non-retroactive, though)
+
+-Quests can now have multiple starters and enders
+
+-(Scripts) GetStarter, SetStarter, GetEnder and SetEnder quest methods were removed, check the new ones.
+
+-(VGM) Offering a quest will now force the quest without a choice and add a pop-up notification on the watch frame, the way Blizzard intended.
+
+-(Scripts) Offer quest method has changed a bit
+
+-(Scripts) No more dynamic text or synonyms table for quest descriptions. You can still use wildcard characters in the text, but they use the default values for the player. Which also means that the details script is gone.
+
+-(Scripts) NPC gossip script has changed slightly. While still being able to send dynamic text, the synonyms table is no more.
+
+-(VPL) NPC questgivers will now show Verisimilar quests on the same page as normal quests.
+
+-(VPL)Quests will now show the quest-giver portrait (if it's an existing NPC)
+
+-(VPL) Minimap icons (NPCs who appear as icons on the minimap) have been currently disabled.
+
+-(VGM) You can now toggle the existence of NPCs for each individual player (sort of like "phasing"). You can also automatate it by using the new Existence Script.
+
+-NPC models for quests! (you know, one of the features that came with 4.0.1)
+
+-(Scripts) You player tables no longer have first name, last name, rank, title, and nickname fields. The race and class fields are their real ones, not what they themselves entered. 
+
+-(VGM) New feature: NPC chat window! You can now converse through an NPC much, much easier.
+
+-(Scripts) Each Script element now also has an event script, which is called whenever a session event occurs.
+
+-(VGM) Complete rehaul of the interface.
+
+-(Scripts) No more script "elements". You will now find your custom scripts in the session panel. To call a script, just call it with it's name as if calling a simple function.
+
+-(VGM) When an NPC needs to talk on targeting, you must now also specify the range that this happens (it is independent from tha "act range")
+
+-(VGM) The various "distances" of NPCs (visible distance, say distance etc), are now given on "map units", which are dependent on map size, and are always less than 1.
+
+-(VGM) Emote distance has been removed. NPCs now use say distance for emotes as well.
+
+
+v0.15
+
+-(VPL)Fixed a non-crittical error when trying to complete quests with more than six different item objectives. The quest window will still display only six items (that's Blizzard's limit), but you can specify any number of item objectives you want.
+
+-(VGM)Fixed error when trying to change the objective values of players for object type objectives. The action will now fail silently. Give them the items instead.
+
+-(VGM)The NPC/Quest wizards will no longer attemt to appear when an NPC or Quest failed to be created.
+
+-(VGM)There is a new seriff in town, and he is very strict when it comes to element IDs. All IDs must now start with a letter, they may contain only letters, numbers and the underscore ('_') character, and must be no longer than 30 characters. No spaces or punctuation allowed. Hopefully this will resolve the issue with the erratic quest chains.
+
+-(VGM)Related to the above, all the current inconsistencies in your old sessions will be automatically corrected to the new format (except for the first character rule). This means that you might not recognize your element IDs, depending on how many bad characters you used. The sessions themselves, though, should be working fine now.
+
+
+
+
+v0.14
+
+-Fixed error on aquiring points (Justice, hero, etc)
+
+v0.13
+
+-Fixed for 4.0.1
+
+-(VGM)You can now sort the "Starts from" and "Ends at" columns in the Quests panel
+
+-GMs can now award GHR reputation (as long as you are using the addon, of course) by using the GiveGHRReputation function. Check the scripts guide for details.
+
+
+v0.12
+
+-(VPL)No more random numbers spamming
+
+-Rapidly clicking on a loot item will no longer give the player multiple copies of it.
+
+v0.11
+
+-Various optimizations and fixing memory issues too terrible to mention.
+
+-(VGM)Scripts are now less cluttered with the inclusion of SubSpecialChars.
+
+-User created items!
+
+-(VPL)Fixed errors that popped up when talking to questgivers.
+
+-(VGM)You can now specify a return-to text for quests.
+
+-(VGM)Quests can now have user made items as requirements.
+
+-(VGM)You can also specify WoW items as objectives, but the function is a bit basic and buggy. I will update it properly if people are interested in that feature, so consider it an "interest demo" for now.
+
+-(VLP)Fixed bug where a newly accepted quest would sometimes not appear in the WoW quest log.
+
+-(VGM)Some entry names in the pop-up menu that were merely numbers are now more descriptive.
+
+-Lootable items from mobs you kill.
+
+-POI for quests.
+
+-Now correctly registers kills for all party members.
+
+-You can now talk to non-interactable NPCs (including hostile mobs) by either targeting them, or if already targeted, clicking on their portrait on the target frame. The GM must have enabled this function for that NPC.
+
+-(VGM) Objective scripts for quests now take additional parameters, including the guid of the mob killed.
+
+-(VGM) When using the Say, Emote or Yell (for NPCs) and Run (for scritps) methods in scritps, you can also specify a delay in seconds before they excecute.
+
+-(VGM)Added a warning for desabled sessions, because even I got confused at some point.
+
+-(VPL)Fixed a silly bug with the quest watch frame. Now new quests higher in the log will not mess with the lower quests.
+
+
+v0.04
+
+
+-(VGM)Wizards: A new, easier way to create elements.
+
+
+-(VGM)Added a warning for local sessions. This will hopefully reduce user paranoia by aproximately 87.4%
+
+
+-(VGM)Selecting quest givers (and enders) for a quest, as well as previous and next quests in the chain, is done by chosing an entry from a list.
+
+
+-Session version is now indepedant of add-on version. That means that you won't have to ask everyone to update whenever I fix an interface bug.
+
+
+-(VGM)You can now create macros for your session elements.
+
+
+
+
+v0.03
+
+-(VGM)New NPCs will have the name of the unit you are targeting, making it even easier to create one.
+
+-There is some sort of localization now. Zone names will appear localized. Demo Session still won't work in non-english clients.
+
+-(VGM)Nice new dropdown menu for switching between sessions from every panel.
+
+-(VGM)You can now create your custom scripts in the scripts panel.
+
+-(VPL)Verisimilar now works with Quest Helper! Apparently it was an easily avoidable error on my part.
+
+
+v0.02
+
+-(VGM)New NPCs will have their coordinates set as the GM's current position (instead of the useless 0,0). Also, their zone will be your current zone.
+
+-(VPL)Fixed bug where Verisimilar would throw an error when closing the gossip window of an NPC when you had unconnected sessions in your list.
+
+-(VPL)Updating quest objectives (killing mobs etc) will no longer add additional copies of the quest to the quest tracker.
+
+-(VGM)A player who is lower than 80 level will no longer be spammed whenever he gains experience through kills. Sorry about that!
+
+-Pop-up menus will no longer linger on the screen when they are out of context (when the window hides or when changing panels)
+
+-(VGM)There is only one Ashenvale, actualy. The impostor has been exposed and purged.
+
+-(VGM)The remove option for a player's active quest is now under it's submenu, instead of between quests.
+
+-Verisimilar now uses Blizzard's pop-up dialog system instead of my own hackish approach. I guess it's better.
+
+-(VGM)Check the new Script Guide in the VerisimilarGM folder!

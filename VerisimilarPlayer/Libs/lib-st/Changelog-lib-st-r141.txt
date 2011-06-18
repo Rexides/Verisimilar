@@ -1,0 +1,26 @@
+------------------------------------------------------------------------
+r141 | ddumont | 2011-01-24 12:55:15 +0000 (Mon, 24 Jan 2011) | 1 line
+Changed paths:
+   M /trunk/Core.lua
+
+project revision change
+------------------------------------------------------------------------
+r140 | ddumont | 2011-01-24 01:16:03 +0000 (Mon, 24 Jan 2011) | 1 line
+Changed paths:
+   M /trunk/Core.lua
+
+project revision change
+------------------------------------------------------------------------
+r139 | ddumont | 2011-01-13 12:41:15 +0000 (Thu, 13 Jan 2011) | 1 line
+Changed paths:
+   M /trunk/Core.lua
+
+26 - Changing cols with SetDisplayCols gives an error and fails
+------------------------------------------------------------------------
+r138 | ddumont | 2011-01-13 04:10:52 +0000 (Thu, 13 Jan 2011) | 1 line
+Changed paths:
+   M /trunk/Core.lua
+   M /trunk/lib-st.toc
+
+26 - Changing cols with SetDisplayCols gives an error and fails
+------------------------------------------------------------------------

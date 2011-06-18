@@ -1,0 +1,980 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+<Frame name="VGMMainElementPanelTemplate" virtual="true">
+	<Anchors>
+		<Anchor point="TOPLEFT">
+			<AbsDimension x="5" y="-80"/>
+		</Anchor>
+		<Anchor point="BOTTOMRIGHT">
+			<AbsDimension x="-5" y="5"/>
+		</Anchor>
+	</Anchors>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<!-- Yay. It's a backdrop. -->
+				<Texture name="$parentTopLeft" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Size>
+						<AbsDimension x="16" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+					<TexCoords left="0.5" right="0.625" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentBottomLeft" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Size>
+						<AbsDimension x="16" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT"/>
+					</Anchors>
+					<TexCoords left="0.75" right="0.875" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentBottomRight" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Size>
+						<AbsDimension x="16" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT"/>
+					</Anchors>
+					<TexCoords left="0.875" right="1" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentTopRight" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Size>
+						<AbsDimension x="16" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPRIGHT"/>
+					</Anchors>
+					<TexCoords left="0.625" right="0.75" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentLeft" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentTopLeft" relativePoint="BOTTOMLEFT"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBottomLeft" relativePoint="TOPRIGHT"/>
+					</Anchors>
+					<TexCoords left="0" right="0.125" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentRight" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentTopRight" relativePoint="BOTTOMLEFT"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBottomRight" relativePoint="TOPRIGHT"/>
+					</Anchors>
+					<TexCoords left="0.125" right="0.25" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentBottom" file="Interface\OptionsFrame\UI-OptionsFrame-Spacer">
+					<Size>
+						<AbsDimension x="0" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parentBottomLeft" relativePoint="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="-2"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBottomRight" relativePoint="BOTTOMLEFT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentTop" file="Interface\OptionsFrame\UI-OptionsFrame-Spacer" hidden="true">
+					<Size>
+						<AbsDimension x="0" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentTopLeft" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="7"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="TOPRIGHT" relativeTo="$parentTopRight" relativePoint="TOPLEFT"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnShow>
+				VerisimilarGM:HandleTabVisibility(self);
+			</OnShow>
+		</Scripts>
+  </Frame>
+  
+  <Button name="VGMPanelTabTemplate" inherits="OptionsFrameTabButtonTemplate" virtual="true">
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentTabSpacer1" file="Interface\OptionsFrame\UI-OptionsFrame-Spacer" hidden="false" parentKey="spacer1">	
+					<Size>
+						<AbsDimension x="64" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="11" y="-6"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentTabSpacer2" file="Interface\OptionsFrame\UI-OptionsFrame-Spacer" hidden="false" parentKey="spacer2">	
+					<Size>
+						<AbsDimension x="16" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-9" y="-6"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.spacer1:SetPoint("LEFT",getglobal(self:GetParent():GetName().."TopLeft"),"RIGHT");
+				self.spacer2:SetPoint("RIGHT",getglobal(self:GetParent():GetName().."TopRight"),"LEFT");
+			</OnLoad>
+			<OnClick>
+				PlaySound("igCharacterInfoTab");
+				VerisimilarGM:TabClickHandler(self)
+				
+			</OnClick>
+		</Scripts>
+  </Button>
+  
+  <Frame name="VGMMainControlTemplate" virtual="true">
+	<Scripts>
+		<OnEnter>
+			if(self.tooltip and VerisimilarGM.db.global.showTooltips)then
+				GameTooltip:ClearLines();
+				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT");
+				GameTooltip:AddLine(self.tooltip,nil,nil,nil,1);
+				GameTooltip:Show();
+			end
+		</OnEnter>
+		<OnLeave>
+			if(self.tooltip and VerisimilarGM.db.global.showTooltips)then
+				GameTooltip:Hide();
+				GameTooltip:ClearLines();
+			end
+		</OnLeave>
+	</Scripts>
+  </Frame>
+ 
+  <Frame name="VGMControlPageTemplate" virtual="true">
+	<Anchors>
+		<Anchor point="TOPLEFT">
+			<AbsDimension x="15" y="-15"/>
+		</Anchor>
+		<Anchor point="BOTTOMRIGHT">
+			<AbsDimension x="-15" y="15"/>
+		</Anchor>
+	</Anchors>
+   </Frame>
+   
+   <Frame name="VGMControlContainerTemplate" virtual="true" inherits="VGMMainControlTemplate" >
+	<Layers>
+			<Layer level="BACKGROUND">
+				<!-- Yay. It's a backdrop. -->
+				<Texture name="$parentTopLeft" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Size>
+						<AbsDimension x="16" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+					<TexCoords left="0.5" right="0.625" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentBottomLeft" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Size>
+						<AbsDimension x="16" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT"/>
+					</Anchors>
+					<TexCoords left="0.75" right="0.875" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentBottomRight" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Size>
+						<AbsDimension x="16" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT"/>
+					</Anchors>
+					<TexCoords left="0.875" right="1" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentTopRight" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Size>
+						<AbsDimension x="16" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPRIGHT"/>
+					</Anchors>
+					<TexCoords left="0.625" right="0.75" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentLeft" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentTopLeft" relativePoint="BOTTOMLEFT"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBottomLeft" relativePoint="TOPRIGHT"/>
+					</Anchors>
+					<TexCoords left="0" right="0.125" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentRight" urgency="5" file="Interface\Tooltips\UI-Tooltip-Border">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentTopRight" relativePoint="BOTTOMLEFT"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBottomRight" relativePoint="TOPRIGHT"/>
+					</Anchors>
+					<TexCoords left="0.125" right="0.25" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentBottom" file="Interface\OptionsFrame\UI-OptionsFrame-Spacer">
+					<Size>
+						<AbsDimension x="0" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parentBottomLeft" relativePoint="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="-2"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBottomRight" relativePoint="BOTTOMLEFT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentTop" file="Interface\OptionsFrame\UI-OptionsFrame-Spacer">
+					<Size>
+						<AbsDimension x="0" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentTopLeft" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="7"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="TOPRIGHT" relativeTo="$parentTopRight" relativePoint="TOPLEFT"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString name="$parentText" inherits="GameFontNormalSmall" parentKey="label">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+							<Offset>
+								<AbsDimension x="5" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+   </Frame>
+   
+	<EditBox name="VGMEditBoxControlTemplate" inherits="InputBoxTemplate,VGMMainControlTemplate" autoFocus="false" virtual="true">
+		<Size>
+			<AbsDimension x="135" y="26"/>
+		</Size>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentText" inherits="GameFontNormalSmall" parentKey="label">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnEditFocusLost>
+				if(self.setFunc)then
+					self:setFunc(self:GetText());
+				end
+				self:HighlightText(0,0);
+			</OnEditFocusLost>
+			<OnEditFocusGained>
+				self:HighlightText(0,0);
+			</OnEditFocusGained>
+			<OnEnterPressed>
+				self:ClearFocus();
+			</OnEnterPressed>
+			<OnTabPressed>
+				
+			</OnTabPressed>
+			<OnShow>
+				if(self.getFunc)then
+					self:SetText(self:getFunc() or "");
+				end
+			</OnShow>
+		</Scripts>
+	</EditBox>
+	
+	<CheckButton name="VGMRadioButtonTemplate" inherits="UIRadioButtonTemplate,VGMMainControlTemplate" virtual="true">
+		<Scripts>
+			<OnClick>
+				if(self.setFunc)then
+					self:setFunc(self:GetID());
+				end
+				local checked=0;
+				if(self.getFunc)then
+					checked=self:getFunc();
+				end
+				for i=1,#self.peers do
+					self.peers[i]:SetChecked(self.peers[i]:GetID()==checked);
+				end
+				
+			</OnClick>
+			<OnShow>
+				if(self.getFunc)then
+					self:SetChecked(self:getFunc()==self:GetID());
+				end
+			</OnShow>
+		</Scripts>
+	</CheckButton>
+	
+	<Frame name="VGMLargeEditBoxTemplate" virtual="true">
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentText" inherits="GameFontNormalSmall" parentKey="label">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+							<Offset>
+								<AbsDimension x="5" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<ScrollFrame name="$parentScrollFrame" inherits="UIPanelScrollFrameTemplate" parentKey="scrollFrame">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="10" y="-6"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="-27" y="5"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<ScrollChild>
+					<EditBox name="$parentEditBox" multiLine="true" autoFocus="false" parentKey="editBox" >
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="20" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnEditFocusLost>
+								if(self.setFunc)then
+									self:setFunc(self:GetText());
+								end
+							</OnEditFocusLost>
+							<OnShow>
+								if(self.getFunc)then
+									self:SetText(self:getFunc());
+								end
+							</OnShow>
+							<OnTextChanged>
+								local scrollBar = getglobal(self:GetParent():GetName().."ScrollBar")
+								local min;
+								local max;
+								min, max = scrollBar:GetMinMaxValues();
+								if ( max > 0 and (self.max ~= max) ) then
+									self.max = max;
+									scrollBar:SetValue(max);
+								end
+							</OnTextChanged>
+							<OnEscapePressed>
+								self:ClearFocus();
+							</OnEscapePressed>
+						</Scripts>
+						<FontString inherits="GameFontHighlightSmall"/>
+					</EditBox>
+				</ScrollChild>
+			</ScrollFrame>
+			<Button name="$parentTextButton" inherits="VGMMainControlTemplate" parentKey="textButton" >
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentScrollFrame" relativePoint="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parentScrollFrame" relativePoint="BOTTOMRIGHT" />
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self:GetParent().scrollFrame.editBox:SetFocus();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="$parentTextBackground">
+				<Anchors>
+					<Anchor point="TOPLEFT" >
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT" >
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+					<EdgeSize>
+						<AbsValue val="16"/>
+					</EdgeSize>
+					<TileSize>
+						<AbsValue val="16"/>
+					</TileSize>
+					<BackgroundInsets>
+						<AbsInset left="5" right="5" top="5" bottom="5"/>
+					</BackgroundInsets>
+				</Backdrop>
+				<Scripts>
+					<OnLoad>
+						
+						self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
+						self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+					</OnLoad>
+					
+				</Scripts>
+			</Frame>
+		</Frames>
+	</Frame>
+	
+	<Button name="VGMListButtonTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="299" y="20"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentStripe" setAllPoints="true" file="Interface\GuildFrame\GuildFrame" parentKey="stripe">
+					<TexCoords left="0.36230469" right="0.38183594" top="0.95898438" bottom="0.99804688"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<HighlightTexture urgency="5" file="Interface\FriendsFrame\UI-FriendsFrame-HighlightBar" alphaMode="ADD" setAllPoints="true"/>
+		<Scripts>
+			<OnLoad>
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+				--self:SetWidth(self:GetParent():GetWidth());
+			</OnLoad>
+			<OnClick>
+				self:GetParent():GetParent():GetParent():ButtonClick(self,button);
+			</OnClick>
+		</Scripts>
+	</Button>
+	
+	<Button name="VGMListColumnTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="10" y="24"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentLeft" urgency="5" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="5" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+					<TexCoords left="0" right="0.078125" top="0" bottom="0.75"/>
+				</Texture>
+				<Texture name="$parentMiddle" urgency="5" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="53" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.078125" right="0.90625" top="0" bottom="0.75"/>
+				</Texture>
+				<Texture name="$parentRight" urgency="5" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="4" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentMiddle" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.90625" right="0.96875" top="0" bottom="0.75"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<ButtonText>
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="8" y="0"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontHighlightSmall"/>
+		<HighlightTexture name="$parentHighlightTexture" file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="$parentLeft">
+					<Offset>
+						<AbsDimension x="-2" y="5"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="BOTTOMRIGHT" relativeTo="$parentRight">
+					<Offset>
+						<AbsDimension x="2" y="-7"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+		<Scripts>
+			<OnClick>
+				self.sortOrder=not self.sortOrder;
+				local list=self:GetParent();
+				list.sortBy=self:GetID();
+				list:Sort();				
+				PlaySound("igMainMenuOptionCheckBoxOn");
+			</OnClick>
+		</Scripts>
+	</Button>
+	
+	<Frame name="VGMListTemplate" inherits="VGMMainControlTemplate" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentPlayerCount" inherits="GameFontHighlightSmall" text="1/1" parentKey="playerCount">
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" x="-7" y="10"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentPlayerCountLabel" inherits="GameFontNormalSmall" text="Connected players:" parentKey="countLabel">
+					<Anchors>
+						<Anchor point="RIGHT" relativeTo="$parentPlayerCount" relativePoint="LEFT" x="0" y="0"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<ScrollFrame name="$parentContainer" inherits="HybridScrollFrameTemplate" parentKey="container">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-24"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="-25" y="25"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND" textureSubLevel="1">
+						<Texture name="$parentInsetBg" file="Interface\FrameGeneral\UI-Background-Marble" horizTile="true" vertTile="true" parentKey="InsetBg">
+							<Anchors>
+								<Anchor point="TOPLEFT" x="0" y="0" />
+								<Anchor point="BOTTOMRIGHT" x="0" y="0" />
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="BORDER" textureSubLevel="-1">
+						<Texture name="$parentInsetTopLeftCorner" inherits="UI-Frame-InnerTopLeft" parentKey="InsetBorderTopLeft">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="$parentInsetBg"/>
+							</Anchors>
+						</Texture>
+
+						<Texture name="$parentInsetTopRightCorner" inherits="UI-Frame-InnerTopRight" parentKey="InsetBorderTopRight">
+							<Anchors>
+								<Anchor point="TOPRIGHT" relativeTo="$parentInsetBg"/>
+							</Anchors>
+						</Texture>
+						
+						<Texture name="$parentInsetBotLeftCorner" inherits="UI-Frame-InnerBotLeftCorner" parentKey="InsetBorderBottomLeft">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativeTo="$parentInsetBg" y="-1"/>
+							</Anchors>
+						</Texture>
+						
+						<Texture name="$parentInsetBotRightCorner" inherits="UI-Frame-InnerBotRight" parentKey="InsetBorderBottomRight">
+							<Anchors>
+								<Anchor point="BOTTOMRIGHT" relativeTo="$parentInsetBg" y="-1"/>
+							</Anchors>
+						</Texture>
+
+						<Texture name="$parentInsetTopBorder" inherits="_UI-Frame-InnerTopTile" parentKey="InsetBorderTop">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="$parentInsetTopLeftCorner" relativePoint="TOPRIGHT"/>
+								<Anchor point="TOPRIGHT" relativeTo="$parentInsetTopRightCorner" relativePoint="TOPLEFT"/>
+							</Anchors>
+						</Texture>
+						<Texture name="$parentInsetBottomBorder" inherits="_UI-Frame-InnerBotTile" parentKey="InsetBorderBottom">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativeTo="$parentInsetBotLeftCorner" relativePoint="BOTTOMRIGHT"/>
+								<Anchor point="BOTTOMRIGHT" relativeTo="$parentInsetBotRightCorner" relativePoint="BOTTOMLEFT"/>
+							</Anchors>
+						</Texture>
+						<Texture name="$parentInsetLeftBorder" inherits="!UI-Frame-InnerLeftTile" parentKey="InsetBorderLeft">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="$parentInsetTopLeftCorner" relativePoint="BOTTOMLEFT" x="0" y="0" />
+								<Anchor point="BOTTOMLEFT" relativeTo="$parentInsetBotLeftCorner" relativePoint="TOPLEFT"/>
+							</Anchors>
+						</Texture>
+						<Texture name="$parentInsetRightBorder" inherits="!UI-Frame-InnerRightTile" parentKey="InsetBorderRight">
+							<Anchors>
+								<Anchor point="TOPRIGHT" relativeTo="$parentInsetTopRightCorner" relativePoint="BOTTOMRIGHT"/>
+								<Anchor point="BOTTOMRIGHT" relativeTo="$parentInsetBotRightCorner" relativePoint="TOPRIGHT"/>
+							</Anchors>
+						</Texture>	
+					</Layer>
+				</Layers>
+				<Frames>
+					<Slider name="$parentScrollBar" inherits="HybridScrollBarTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="0" y="-17"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+								<Offset>
+									<AbsDimension x="0" y="14"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Slider>
+				</Frames>
+			</ScrollFrame>
+			<CheckButton name="GuildRosterShowOfflineButton" parentKey="showOffline">
+				<Size>
+					<AbsDimension x="20" y="20"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="3" y="4"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString inherits="GameFontNormalSmall" text="Show disconnected players">
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT">
+									<Offset>
+										<AbsDimension x="2" y="1"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						if ( self:GetChecked() ) then
+							PlaySound("igMainMenuOptionCheckBoxOff");
+						else
+							PlaySound("igMainMenuOptionCheckBoxOn");
+						end
+						self:GetParent():UpdateData();
+					</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Up"/>
+				<PushedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Down"/>
+				<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
+				<CheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check"/>
+				<DisabledCheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
+			</CheckButton>
+		</Frames>
+		<Scripts>
+			<OnShow>
+				self:UpdateData();
+			</OnShow>
+		</Scripts>
+	</Frame>
+	
+	<Button name="VGMButtonControlTemplate" inherits="UIPanelButtonTemplate2,VGMMainControlTemplate" virtual="true">
+		<Scripts>
+			<OnClick>
+				self:ButtonClick(button);
+			</OnClick>
+		</Scripts>	
+	</Button>
+	
+	<CheckButton name="VGMCheckButtonControlTemplate" inherits="UICheckButtonTemplate,VGMMainControlTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self.label=getglobal(self:GetName().."Text");
+			</OnLoad>
+			<OnClick>
+				self:ButtonClick(self:GetChecked());
+			</OnClick>
+			<OnShow>
+				self:SetChecked(self:GetCheckedStatus());
+				self:ButtonClick(self:GetChecked());
+			</OnShow>
+		</Scripts>
+	</CheckButton>
+	
+	<Frame name="VGMDropDownControlTemplate" inherits="UIDropDownMenuTemplate,VGMMainControlTemplate" virtual="true">
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentText" inherits="GameFontNormalSmall" parentKey="label">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+							<Offset>
+								<AbsDimension x="25" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.button=getglobal(self:GetName().."Button");
+				self.button:SetScript("OnClick",function()self:ButtonClick()end);
+               --UIDropDownMenu_Initialize(self, MyDropDownMenu_OnLoad, "MENU");
+			</OnLoad>
+			<OnShow>
+				local menu=self:menuFunc();
+				for i=1,#menu do
+					if(menu[i].checked)then
+						menu[i].func(nil,menu[i].arg1,menu[i].arg2);
+						return
+					end
+				end
+
+				if(menu.func)then
+					if(#menu>0)then
+						menu.func(nil,menu[1].arg1,menu[1].arg2);
+					else
+						menu.func()
+					end
+				end
+			</OnShow>
+		</Scripts>
+	</Frame>
+	
+	<Frame name="VGMAreaControlTemplate" inherits="VGMMainControlTemplate" virtual="true">
+		<Size x="800" y="400"/>
+		<Anchors>
+			<Anchor point="CENTER" x="0" y="0"/>
+		</Anchors>
+		<Frames>
+			<Frame name="$parentMap" hidden="false" parentKey="Map">
+                <Size>
+                    <AbsDimension x="1002" y="668"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$parent">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture name="$parentDetailTile1">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture name="$parentDetailTile2">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeTo="$parentDetailTile1" relativePoint="TOPRIGHT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture name="$parentDetailTile3">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeTo="$parentDetailTile2" relativePoint="TOPRIGHT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture name="$parentDetailTile4">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeTo="$parentDetailTile3" relativePoint="TOPRIGHT"/>
+                            </Anchors>
+                        </Texture>	
+                        <Texture name="$parentDetailTile5">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeTo="$parentDetailTile1" relativePoint="BOTTOMLEFT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture name="$parentDetailTile6">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeTo="$parentDetailTile5" relativePoint="TOPRIGHT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture name="$parentDetailTile7">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeTo="$parentDetailTile6" relativePoint="TOPRIGHT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture name="$parentDetailTile8">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeTo="$parentDetailTile7" relativePoint="TOPRIGHT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture name="$parentDetailTile9">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeTo="$parentDetailTile5" relativePoint="BOTTOMLEFT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture name="$parentDetailTile10">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeTo="$parentDetailTile9" relativePoint="TOPRIGHT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture name="$parentDetailTile11">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeTo="$parentDetailTile10" relativePoint="TOPRIGHT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture name="$parentDetailTile12">
+                            <Size>
+                                <AbsDimension x="256" y="256"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeTo="$parentDetailTile11" relativePoint="TOPRIGHT"/>
+                            </Anchors>
+                        </Texture>	
+                    </Layer>
+                </Layers>
+            </Frame>
+			<Button name="$parentMapButton" parentKey="mapButton">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentMap" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parentMap" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent().Map:GetFrameLevel()+1);
+					</OnLoad>
+					<OnClick>
+						self:GetParent():MapClicked();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="$parentLevelDropDown" inherits="UIDropDownMenuTemplate" parentKey="levelDD">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentMap" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="-20" y="1"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetFrameLevel()+10);
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<EditBox name="$parentFilter" parentKey="filter" inherits="InputBoxTemplate" autoFocus="false">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentMap" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="10" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Size>
+                    <AbsDimension x="120" y="26"/>
+                </Size>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentText" inherits="GameFontHighlightSmall" text="Zone filter">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+									<Offset>
+										<AbsDimension x="0" y="0"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnTextChanged>
+						self:GetParent().mapList:SortData();
+					</OnTextChanged>
+					<OnEnterPressed>
+						self:ClearFocus();
+					</OnEnterPressed>
+					<OnEscapePressed>
+						self:ClearFocus();
+					</OnEscapePressed>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self:SetFrameLevel(1)
+			</OnLoad>
+			<OnShow>
+				self:UpdateData();
+			</OnShow>
+		</Scripts>
+	</Frame>
+	
+	<Button name="VGMIconControlTemplate" inherits="ItemButtonTemplate,VGMMainControlTemplate" virtual="true">
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentText" inherits="GameFontNormalSmall" parentKey="label">
+					<Anchors>
+						<Anchor point="RIGHT" relativeTo="$parent" relativePoint="LEFT">
+							<Offset>
+								<AbsDimension x="-10" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnShow>
+				SetItemButtonTexture(self,"Interface\\Icons\\"..(self:getFunc() or ""));
+			</OnShow>
+			<OnClick>
+				local iconButton=self;
+				VerisimilarGM:ShowIconChooser(function(icon)iconButton:setFunc(icon);SetItemButtonTexture(iconButton,"Interface\\Icons\\"..icon); end)
+			</OnClick>
+		</Scripts>
+	</Button>
+ </Ui>

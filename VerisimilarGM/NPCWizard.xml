@@ -1,0 +1,949 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+
+<Frame name="VGMNPCWizard" inherits="VGMWizardTemplate">
+	<Scripts>
+		<OnLoad>
+			self.LoadEntity=function()
+								self.editboxName:SetText(self.entity:GetName());
+								self.dropdownZone.zone=self.entity:GetZone()
+								UIDropDownMenu_SetText(self.dropdownZone, self.entity:GetZone());
+								local npcx,npcy=self.entity:GetCoords();
+								self.editboxCoord:SetText(npcx..','..npcy);
+								self.editboxSayDist:SetText(self.entity:GetSayDistance());
+								self.editboxEmoteDist:SetText(self.entity:GetEmoteDistance());
+								self.editboxYellDist:SetText(self.entity:GetYellDistance());
+								self.editboxVisDist:SetText(self.entity:GetVisibleDistance());
+								self.editboxActDist:SetText(self.entity:GetActDistance());
+								self.iconButton.icon=self.entity:GetIcon()
+								SetItemButtonTexture(self.iconButton,"Interface\\Icons\\"..self.iconButton.icon);
+								self.hasIconButton:SetChecked(self.entity:HasEnvironmentIcon())
+								self.gossip={}								
+								for i=0,self.entity:GetNumGossipOptions() do
+									self.gossip[i]={
+													optionText=self.entity:GetOptionText(i),
+													gossipText=self.entity:GetOptionGossip(i)
+													}
+								end
+								self.setGossip(0)
+							end
+			local wizard=self;
+			self.setGossip=function(gossipNum)
+								wizard.currentGossip=gossipNum;
+								wizard.deleteGossipButton:Enable()
+								wizard.editboxOptionText:SetText(wizard.gossip[gossipNum].optionText)
+								wizard.editboxGossipText:SetText(wizard.gossip[gossipNum].gossipText)
+								if(gossipNum==0)then gossipNum="Greetings"; wizard.deleteGossipButton:Disable() end
+								UIDropDownMenu_SetText(self.dropdownGossip, gossipNum);
+							end
+			self.FinishFunc=function()
+								self.entity:SetName(self.editboxName:GetText())
+								self.entity:SetZone(self.dropdownZone.zone)
+								self.entity:SetCoords(strsplit(',',self.editboxCoord:GetText()))
+								self.entity:SetSayDistance(self.editboxSayDist:GetText())
+								self.entity:SetEmoteDistance(self.editboxEmoteDist:GetText())
+								self.entity:SetYellDistance(self.editboxYellDist:GetText())
+								self.entity:SetVisibleDistance(self.editboxVisDist:GetText())
+								self.entity:SetActDistance(self.editboxActDist:GetText())
+								self.entity:SetIcon(self.iconButton.icon)
+								if(self.hasIconButton:GetChecked()==1)then
+									self.entity:SetEnvironmentIcon(true)
+								else
+									self.entity:SetEnvironmentIcon(false)
+								end
+								while(self.entity:GetNumGossipOptions()>0)do
+									self.entity:RemoveOption(1)
+								end
+								self.entity:SetOptionText(0,self.gossip[0].optionText)
+								self.entity:SetOptionGossip(0,self.gossip[0].gossipText)
+								for i=1,#self.gossip do
+									self.entity:AddOption()
+									self.entity:SetOptionText(i,self.gossip[i].optionText)
+									self.entity:SetOptionGossip(i,self.gossip[i].gossipText)
+								end
+							end
+			VGMNPCWizardPanel1NameDesc:SetWidth(500);
+			VGMNPCWizardPanel1ZoneDesc:SetWidth(500);
+			VGMNPCWizardPanel1CoordDesc:SetWidth(500);
+			VGMNPCWizardPanel2DistDesc:SetWidth(500);
+			VGMNPCWizardPanel2VisActDesc:SetWidth(500);
+			VGMNPCWizardPanel2IconDesc:SetWidth(500);
+			VGMNPCWizardPanel3GossipDesc1:SetWidth(500);
+			VGMNPCWizardPanel3GossipDesc2:SetWidth(500);
+			VGMNPCWizardPanel3GossipDesc3:SetWidth(500);
+		</OnLoad>
+	</Scripts>
+	<Frames>
+		<Frame name="$parentPanel1" inherits="VGMWizardPanelTemplate" id="1">
+			<Layers> 
+			  <Layer level="ARTWORK">
+	
+					<FontString name="$parentNameDesc" hidden="false" inherits="GameFontNormal" text="The NPC's full name as it will appear to the players. If you want your NPC to “merge” with an interactable game NPC in the 3D world, type his exact name here.">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentNameLabel" hidden="false" inherits="GameFontNormal" text="Name:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentNameDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-12"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentZoneDesc" hidden="false" inherits="GameFontNormal" text="The zone self NPC is in. Note that the current version of Verisinilar does not support instances, Dalaran and the Deeprun Tram">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-150"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-150"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentZoneLabel" hidden="false" inherits="GameFontNormal" text="Zone:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentZoneDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-12"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentCoordDesc" hidden="false" inherits="GameFontNormal" text="The NPC's Coordinates in the zone, in x,y format. Make sure to provide the corect coordinates even for existing NPCs whose gossip you are editing (does not have to be acurate, though).">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-250"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-250"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentCoordLabel" hidden="false" inherits="GameFontNormal" text="Coordinates:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentCoordDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-12"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+				</Layer>
+			</Layers> 
+			<Frames>
+				<EditBox name="$parentNameBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="120" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentNameLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="15" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxName=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+				<Button name="$parentSetNameButton" inherits="UIPanelButtonTemplate" text="Set as target's name" >
+				    <Size>
+						<AbsDimension x="160" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentNameBox" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="10" y="0"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnClick> self:GetParent():GetParent().editboxName:SetText(UnitName("target") or "")</OnClick>
+				    </Scripts>
+				</Button>
+				<Frame name="$parentZoneDD" inherits="UIDropDownMenuTemplate">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentZoneLabel" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="-3" y="-2"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<FontString inherits="ChatFontNormal"/>
+					<Scripts>
+						<OnLoad>
+							local wizard=self:GetParent():GetParent();
+							wizard.dropdownZone=self
+							VGMNPCWizardPanel1ZoneDDButton:HookScript("OnClick",
+								function()
+									local dewdrop = AceLibrary("Dewdrop-2.0")
+									local x,y=GetCursorPosition();
+									local SetZone=function(zone)
+										wizard.dropdownZone.zone=zone
+										UIDropDownMenu_SetText(wizard.dropdownZone, zone);
+									end
+									dewdrop:Open(VGMNPCWizardPanel1ZoneDDButton,
+												'children',	function()
+														local menuTable={};
+														tinsert(menuTable,				{
+																							text="Eastern Kingdoms",
+																							hasArrow=true,
+																							subMenu={},
+																						})
+														tinsert(menuTable,				{
+																							text="Kalimdor",
+																							hasArrow=true,
+																							subMenu={},
+																						})
+														tinsert(menuTable,				{
+																							text="Outlands",
+																							hasArrow=true,
+																							subMenu={},
+																						})
+														tinsert(menuTable,				{
+																							text="Northrend",
+																							hasArrow=true,
+																							subMenu={},
+																						})
+														tinsert(menuTable,				{
+																							text="Battlegrounds",
+																							hasArrow=true,
+																							subMenu={},
+																						})
+														tinsert(menuTable,				{
+																							text="Dungeons",
+																							hasArrow=true,
+																							subMenu={},
+																						})
+														tinsert(menuTable,				{
+																							text="None",
+																							checked=(wizard.dropdownZone.zone==nil),
+																							func=SetZone,
+																							arg1=nil,
+																						})
+																					
+															local BabbleZone=LibStub("LibBabble-Zone-3.0")
+															local b=BabbleZone:GetLookupTable()
+															for i=1,#VerisimilarPl.zoneList.easternKingdoms do
+																tinsert(menuTable[1].subMenu,{	text=b[VerisimilarPl.zoneList.easternKingdoms[i]],
+																									checked=(wizard.dropdownZone.zone==b[VerisimilarPl.zoneList.easternKingdoms[i]]),
+																									func=SetZone,
+																									arg1=b[VerisimilarPl.zoneList.easternKingdoms[i]],
+																								});
+															end
+															for i=1,#VerisimilarPl.zoneList.kalimdor do
+																tinsert(menuTable[2].subMenu,{	text=b[VerisimilarPl.zoneList.kalimdor[i]],
+																									checked=(wizard.dropdownZone.zone==b[VerisimilarPl.zoneList.kalimdor[i]]),
+																									func=SetZone,
+																									arg1=b[VerisimilarPl.zoneList.kalimdor[i]],
+																								});
+															end
+															for i=1,#VerisimilarPl.zoneList.outlands do
+																tinsert(menuTable[3].subMenu,{	text=b[VerisimilarPl.zoneList.outlands[i]],
+																									checked=(wizard.dropdownZone.zone==b[VerisimilarPl.zoneList.outlands[i]]),
+																									func=SetZone,
+																									arg1=b[VerisimilarPl.zoneList.outlands[i]],
+																								});
+															end
+															for i=1,#VerisimilarPl.zoneList.northrend do
+																tinsert(menuTable[4].subMenu,{	text=b[VerisimilarPl.zoneList.northrend[i]],
+																									checked=(wizard.dropdownZone.zone==b[VerisimilarPl.zoneList.northrend[i]]),
+																									func=SetZone,
+																									arg1=b[VerisimilarPl.zoneList.northrend[i]],
+																								});
+															end
+															for i=1,#VerisimilarPl.zoneList.battlegrounds do
+																tinsert(menuTable[5].subMenu,{	text=b[VerisimilarPl.zoneList.battlegrounds[i]],
+																									checked=(wizard.dropdownZone.zone==b[VerisimilarPl.zoneList.battlegrounds[i]]),
+																									func=SetZone,
+																									arg1=b[VerisimilarPl.zoneList.battlegrounds[i]],
+																								});
+															end
+															dewdrop:FeedTable(menuTable);
+												
+								end
+								
+							);
+							end
+							);
+						</OnLoad>
+						<OnShow>
+							UIDropDownMenu_SetWidth(self, 110);
+						</OnShow>
+					</Scripts>
+				</Frame>
+				<Button name="$parentZoneButton" inherits="UIPanelButtonTemplate" text="Set as current zone" >
+				    <Size>
+						<AbsDimension x="160" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentZoneDD" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-7" y="3"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnClick> 	self:GetParent():GetParent().dropdownZone.zone=GetRealZoneText()
+									UIDropDownMenu_SetText(VGMNPCWizardPanel1ZoneDD, GetRealZoneText());
+						</OnClick>
+				    </Scripts>
+				</Button>
+				<EditBox name="$parentCoordBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="230" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentCoordLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="15" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxCoord=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+				<Button name="$parentCoordButton" inherits="UIPanelButtonTemplate" text="Set as my coordinates" >
+				    <Size>
+						<AbsDimension x="180" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentCoordBox" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-5"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnClick>
+				    		local x,y=GetPlayerMapPosition("player"); 	
+				    		self:GetParent():GetParent().editboxCoord:SetText(x..","..y)	
+				    	</OnClick>
+				    </Scripts>
+				</Button>
+			</Frames>
+		</Frame>
+		<Frame name="$parentPanel2" inherits="VGMWizardPanelTemplate" id="2">
+			<Layers> 
+			  <Layer level="ARTWORK">
+	
+					<FontString name="$parentDistDesc" hidden="false" inherits="GameFontNormal" text="These are the distances, in yards, that players connected to the session can hear the NPC.">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentSayDistLabel" hidden="false" inherits="GameFontNormal" text="Say Distance:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentDistDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-12"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentEmoteDistLabel" hidden="false" inherits="GameFontNormal" text="Emote Distance:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentSayDistLabel" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-18"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentYellDistLabel" hidden="false" inherits="GameFontNormal" text="Yell Distance:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentEmoteDistLabel" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-18"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					
+					<FontString name="$parentVisActDesc" hidden="false" inherits="GameFontNormal" text="These are the distances, in yards, that the NPC's icon will appear in the player's minimap, and be able to interact with him. Enter these even if you are modifying an existing NPC, because the player may have chosen not to merge the add-on with the interface">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-150"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-150"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentVisDistLabel" hidden="false" inherits="GameFontNormal" text="Visibility Distance:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentVisActDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-12"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentActDistLabel" hidden="false" inherits="GameFontNormal" text="Interaction Distance:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentVisDistLabel" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-18"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentIconDesc" hidden="false" inherits="GameFontNormal" text="Choose the icon that represents the NPC. If you are modifying an existing NPC, uncheck the 'Has enviromental icon' option if you don't want the icon to show up. Even in that case, make sure to pick an icon anyway because the player may not have merged the add-on with the interface">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-280"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-280"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentHasIconLabel" hidden="false" inherits="GameFontNormal" text="Has Environment Icon">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentIconDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="125" y="-36"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+				</Layer>
+			</Layers> 
+			<Frames>
+				<EditBox name="$parentSayDistBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="35" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentSayDistLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="33" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxSayDist=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+				<Button name="$parentSetSayDistButton" inherits="UIPanelButtonTemplate" text="Distance from me" >
+				    <Size>
+						<AbsDimension x="160" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentSayDistBox" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="10" y="0"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnClick> 
+				    		local wizard=self:GetParent():GetParent();
+				    		local npcx,npcy=wizard.entity:GetCoords();
+				    		local x,y=GetPlayerMapPosition("player"); 
+				    		wizard.editboxSayDist:SetText(ceil(VerisimilarPl:Distance(npcx,npcy,x,y)))
+				    	</OnClick>
+				    </Scripts>
+				</Button>
+				<EditBox name="$parentEmoteDistBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="35" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentEmoteDistLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="15" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxEmoteDist=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+				<Button name="$parentSetEmoteDistButton" inherits="UIPanelButtonTemplate" text="Distance from me" >
+				    <Size>
+						<AbsDimension x="160" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentEmoteDistBox" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="10" y="0"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnClick> 
+				    		local wizard=self:GetParent():GetParent();
+				    		local npcx,npcy=wizard.entity:GetCoords();
+				    		local x,y=GetPlayerMapPosition("player"); 
+				    		wizard.editboxEmoteDist:SetText(ceil(VerisimilarPl:Distance(npcx,npcy,x,y)))
+				    	</OnClick>
+				    </Scripts>
+				</Button>
+				<EditBox name="$parentYellDistBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="35" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentYellDistLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="32" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxYellDist=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+				<Button name="$parentSetYellDistButton" inherits="UIPanelButtonTemplate" text="Distance from me" >
+				    <Size>
+						<AbsDimension x="160" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentYellDistBox" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="10" y="0"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnClick> 
+				    		local wizard=self:GetParent():GetParent();
+				    		local npcx,npcy=wizard.entity:GetCoords();
+				    		local x,y=GetPlayerMapPosition("player"); 
+				    		wizard.editboxYellDist:SetText(ceil(VerisimilarPl:Distance(npcx,npcy,x,y)))
+				    	</OnClick>
+				    </Scripts>
+				</Button>
+				<EditBox name="$parentVisDistBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="35" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentVisDistLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="33" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxVisDist=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+				<Button name="$parentSetVisDistButton" inherits="UIPanelButtonTemplate" text="Distance from me" >
+				    <Size>
+						<AbsDimension x="160" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentVisDistBox" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="10" y="0"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnClick> 
+				    		local wizard=self:GetParent():GetParent();
+				    		local npcx,npcy=wizard.entity:GetCoords();
+				    		local x,y=GetPlayerMapPosition("player"); 
+				    		wizard.editboxVisDist:SetText(ceil(VerisimilarPl:Distance(npcx,npcy,x,y)))
+				    	</OnClick>
+				    </Scripts>
+				</Button>
+				<EditBox name="$parentActDistBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="35" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentActDistLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="20" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxActDist=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+				<Button name="$parentSetVisDistButton" inherits="UIPanelButtonTemplate" text="Distance from me" >
+				    <Size>
+						<AbsDimension x="160" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentActDistBox" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="10" y="0"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnClick> 
+				    		local wizard=self:GetParent():GetParent();
+				    		local npcx,npcy=wizard.entity:GetCoords();
+				    		local x,y=GetPlayerMapPosition("player"); 
+				    		wizard.editboxActDist:SetText(ceil(VerisimilarPl:Distance(npcx,npcy,x,y)))
+				    	</OnClick>
+				    </Scripts>
+				</Button>
+				<Button name="$parentIconButton" inherits="ItemButtonTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentIconDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="35" y="-25"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().iconButton=self
+						</OnLoad>
+						<OnClick>
+							local iconButton=self;
+							VerisimilarGM:ShowIconChooser(function(icon)VerisimilarGM:Print(icon,self,iconButton);iconButton.icon=icon;SetItemButtonTexture(iconButton,"Interface\\Icons\\"..iconButton.icon); end)
+						</OnClick>
+					</Scripts>
+				</Button>
+				<CheckButton name="$parentHasIconButton" inherits="UICheckButtonTemplate">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentIconButton" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="20" y="0"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnLoad>
+							self:GetParent():GetParent().hasIconButton=self
+						</OnLoad>
+				    </Scripts>
+				</CheckButton>
+			</Frames>
+		</Frame>
+		<Frame name="$parentPanel3" inherits="VGMWizardPanelTemplate" id="3">
+			<Layers> 
+			  <Layer level="ARTWORK">
+	
+					<FontString name="$parentGossipDesc1" hidden="false" inherits="GameFontNormal" text="Edit the NPC's gossip here. The 'Greetings' option is the only choice a player is given when first talking to the NPC, and it's gossip will serve as the introductory text (assuming you are editing an NPC, otherwise it will go to the intro text).">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentGossipDesc2" hidden="false" inherits="GameFontNormal" text="You may then add any other gossip options you want, and they will be presented like the direction options for guards. For dynamic text, you can use the following substitution strings (note that they only work for the gossip text, not the option text):">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-50"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-50"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentGossipDesc3" hidden="false" inherits="GameFontNormal" text="%fn (first name), %ln (last name), %nn(nickname), %rk (rank), %tl (title), %gr (gender), %rc (race) and %cl (class)">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-100"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-100"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentOptionTextLabel" hidden="false" inherits="GameFontNormal" text="Option text:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentGossipDesc3" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="15" y="-46"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentGossipTextLabel" hidden="false" inherits="GameFontNormal" text="Gossip text:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentOptionTextLabel" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+				</Layer>
+			</Layers> 
+			<Frames>
+				<Frame name="$parentGossipDD" inherits="UIDropDownMenuTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentGossipDesc3" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-10"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<FontString inherits="ChatFontNormal"/>
+					<Scripts>
+						<OnLoad>
+							local wizard=self:GetParent():GetParent();
+							wizard.dropdownGossip=self
+							VGMNPCWizardPanel3GossipDDButton:HookScript("OnClick",
+								function()
+									local dewdrop = AceLibrary("Dewdrop-2.0")
+									local x,y=GetCursorPosition();
+									dewdrop:Open(VGMNPCWizardPanel3GossipDDButton,
+												'children',	function()
+																local menuTable={};
+																tinsert(menuTable,{	text="Greetings",
+																					checked=(wizard.currentGossip==0),
+																					func=wizard.setGossip,
+																					arg1=0
+																					});
+																for i=1,#wizard.gossip do
+																	tinsert(menuTable,{	text=i,
+																						checked=(wizard.currentGossip==i),
+																						func=wizard.setGossip,
+																						arg1=i
+																						});
+																end
+																dewdrop:FeedTable(menuTable);
+												
+															end
+								
+												);
+									
+							end
+							);
+						</OnLoad>
+						<OnShow>
+							UIDropDownMenu_SetWidth(self, 110);
+						</OnShow>
+					</Scripts>
+				</Frame>
+				<Button name="$parentNewGossipButton" inherits="UIPanelButtonTemplate" text="New Gossip" >
+				    <Size>
+						<AbsDimension x="120" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentGossipDD" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="10" y="3"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnClick> 
+				    		AceLibrary("Dewdrop-2.0"):Close()
+				    		local wizard=self:GetParent():GetParent();
+				    		tinsert(wizard.gossip,{optionText="",gossipText=""})
+				    		wizard.setGossip(#wizard.gossip)
+				    	</OnClick>
+				    </Scripts>
+				</Button>
+				<Button name="$parentDeleteGossipButton" inherits="UIPanelButtonTemplate" text="Delete Gossip" >
+				    <Size>
+						<AbsDimension x="120" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentNewGossipButton" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="10" y="0"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnLoad>
+				    		local wizard=self:GetParent():GetParent();
+							wizard.deleteGossipButton=self
+				    	</OnLoad>
+				    	<OnClick> 
+				    		AceLibrary("Dewdrop-2.0"):Close()
+				    		local wizard=self:GetParent():GetParent();
+				    		tremove(wizard.gossip,wizard.currentGossip);
+				    		if(wizard.currentGossip>#wizard.gossip)then
+				    			wizard.currentGossip=wizard.currentGossip-1;
+				    		end
+				    		wizard.setGossip(wizard.currentGossip)
+				    	</OnClick>
+				    </Scripts>
+				</Button>
+				<EditBox name="$parentOptionTextBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="350" y="36"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentOptionTextLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="10" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxOptionText=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+						<OnTextChanged>
+							local wizard=self:GetParent():GetParent()
+							wizard.gossip[wizard.currentGossip].optionText=self:GetText()
+						</OnTextChanged>
+					</Scripts>			
+				</EditBox>
+				<EditBox name="$parentGossipTextBox" autoFocus="false" multiLine="true">
+				   
+				    <Anchors>
+				        <Anchor point="TOPLEFT" relativeTo="$parentGossipTextLabel" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-5"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentGossipTextLabel" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="400" y="-200"/>
+							</Offset>
+						</Anchor>
+				    </Anchors> 
+				    <FontString inherits="GameFontHighlightSmall"/>
+				    <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+						<EdgeSize>
+							<AbsValue val="1"/>
+						</EdgeSize>
+						<TileSize>
+							<AbsValue val="16"/>
+						</TileSize>
+						<BackgroundInsets>
+							<AbsInset left="0" right="0" top="0" bottom="0"/>
+						</BackgroundInsets>
+					</Backdrop>  
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxGossipText=self
+							self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
+							self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+						<OnTextChanged>
+							local wizard=self:GetParent():GetParent()
+							wizard.gossip[wizard.currentGossip].gossipText=self:GetText()
+						</OnTextChanged>
+					</Scripts>			
+				</EditBox>
+			</Frames>
+		</Frame>
+	</Frames>
+</Frame>
+</Ui>

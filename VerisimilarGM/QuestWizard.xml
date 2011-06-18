@@ -1,0 +1,1466 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+
+<Frame name="VGMQuestWizard" inherits="VGMWizardTemplate">
+	<Scripts>
+		<OnLoad>
+			local getID=function(object)
+				if(object)then
+					return object.id
+				end
+			end
+			self.LoadEntity=function()
+				self.editboxTitle:SetText(self.entity:GetTitle());
+				self.editboxLevel:SetText(self.entity:GetLevel());
+				UIDropDownMenu_SetText(self.dropdownCategory, self.entity:GetCategory());
+				self.dropdownCategory.category=self.entity:GetCategory();
+				UIDropDownMenu_SetText(self.dropdownStarter, getID(self.entity:GetStarter()) or "none");
+				self.dropdownStarter.starter=getID(self.entity:GetStarter());
+				UIDropDownMenu_SetText(self.dropdownEnder, getID(self.entity:GetEnder()) or "none");
+				self.dropdownEnder.ender=getID(self.entity:GetEnder());
+				UIDropDownMenu_SetText(self.dropdownPrevQuest, getID(self.entity:GetPreviousQuest()) or "none");
+				self.dropdownPrevQuest.starter=getID(self.entity:GetPreviousQuest());
+				UIDropDownMenu_SetText(self.dropdownNextQuest, getID(self.entity:GetNextQuest()) or "none");
+				self.dropdownNextQuest.ender=getID(self.entity:GetNextQuest());
+				self.editboxQuestText:SetText(self.entity:GetQuestDescription());
+				self.editboxSummaryText:SetText(self.entity:GetObjectivesSummary());
+				self.editboxProgressText:SetText(self.entity:GetProgressText());
+				self.editboxCompletionText:SetText(self.entity:GetCompletionText());
+				self.editboxReturnToText:SetText(self.entity:GetReturnToText());
+				self.objectives={}
+				for i=1,#self.entity.objectives do
+					self.objectives[i]={}
+					self.objectives[i].text=self.entity:GetObjectiveText(i)
+					self.objectives[i].targetValue=self.entity:GetObjectiveTargetValue(i)
+					self.objectives[i].event=self.entity:GetObjectiveEvent(i)
+					self.objectives[i].filter=self.entity:GetEventFilter(i)
+				end
+				self.setObjective(#self.objectives)
+			end
+			local wizard=self;
+			self.setObjective=function(objNum)
+								wizard.currentObjective=objNum;
+								wizard.deleteObjectiveButton:Enable()
+								wizard.dropdownEventList.button:Enable()
+								local event="None"
+								if(wizard.objectives[objNum])then
+									event=wizard.objectives[objNum].event
+								end
+								UIDropDownMenu_SetText(wizard.dropdownEventList, event);
+								wizard.setEvent(event,objNum)
+								if(wizard.objectives[objNum])then
+									wizard.editboxTargetVal:SetText(wizard.objectives[objNum].targetValue or 1);
+									wizard.editboxObjText:SetText(wizard.objectives[objNum].text or "");
+									wizard.editboxFilter:SetText(wizard.objectives[objNum].filter or "");
+								end
+								if(objNum==0)then 
+									objNum="none"; 
+									wizard.deleteObjectiveButton:Disable() 
+									wizard.dropdownEventList.button:Disable()
+								end
+								UIDropDownMenu_SetText(self.dropdownObjectivesList, objNum);
+							end
+			self.setEvent=function(event,objNum)
+											if(event==nil or objNum==0)then return end
+											wizard.objectives[objNum].event=event;
+											UIDropDownMenu_SetText(wizard.dropdownEventList, event);
+											local typeDesc={
+															["Kill"]="Kill objectives require the slaying of mobs for completion.",
+															["Subzone"]="Subzone objectives require the player to visit a particular subzone.",
+															["Item"]="Item objectives require the player to aquire certain items.",
+															["Script"]="Script objectives can be triggered from any script, or through the player's menu in the player panel.",
+															["None"]="",
+															}
+											local objTextDesc={
+															["Kill"]="Enter the objective text (for example: 'Murlocs slain')",
+															["Subzone"]="Enter the objective text (for example: 'Cathedral visited')",
+															["Item"]="Enter the objective text (for example: 'Gorilla fins')",
+															["Script"]="Enter the objective text (for example: 'Suspect interrogated')",
+															["None"]="",
+															}
+											local targetValDesc={
+															["Kill"]="Enter the number of kills required for completition.",
+															["Subzone"]="For subzone objectives, leave the target value to 1.",
+															["Item"]="Enter the number of items required for completition.",
+															["Script"]="Enter the number of script calls required for completion of the objective.",
+															["None"]="",
+															}
+											local filterDesc={
+															["Kill"]="Enter the name of the mob to kill. For objectives that cover more than one mob, separate the names with commas (,).",
+															["Subzone"]="Enter the name of the subzone.",
+															["Item"]="Enter the id of the item.",
+															["Script"]="Enter a unique string that identifies self objective.",
+															["None"]="",
+															}
+											local buttonText={
+															["Kill"]="Set as my target",
+															["Subzone"]="Set as my subzone",
+															["Item"]="Item id list",
+															["Script"]="Generate unique string",
+															["None"]="",
+															}
+															
+											VGMQuestWizardPanel8TypeDesc:SetText(typeDesc[event] or "");
+											VGMQuestWizardPanel8ObjTextDesc:SetText(objTextDesc[event] or "")
+											VGMQuestWizardPanel8TargetValDesc:SetText(targetValDesc[event] or "")
+											VGMQuestWizardPanel8FilterDesc:SetText(filterDesc[event] or "")
+											wizard.defaultFilterButton:SetText(buttonText[event] or "")
+							end
+			
+			self.FinishFunc=function()
+				self.entity:SetTitle(self.editboxTitle:GetText())
+				self.entity:SetLevel(self.editboxLevel:GetText())
+				self.entity:SetCategory(self.dropdownCategory.category)
+				self.entity:SetStarter(self.dropdownStarter.starter)
+				self.entity:SetEnder(self.dropdownEnder.ender)
+				self.entity:SetPreviousQuest(self.dropdownPrevQuest.previous)
+				self.entity:SetNextQuest(self.dropdownNextQuest.next)
+				self.entity:SetQuestDescription(self.editboxQuestText:GetText())
+				self.entity:SetObjectivesSummary(self.editboxSummaryText:GetText())
+				self.entity:SetProgressText(self.editboxProgressText:GetText())
+				self.entity:SetCompletionText(self.editboxCompletionText:GetText())
+				self.entity:SetReturnToText(self.editboxReturnToText:GetText())
+				self.entity.objectives={}
+				for i=1,#self.objectives do
+					self.entity:AddObjective()
+					self.entity:SetObjectiveText(i,self.objectives[i].text)
+					self.entity:SetObjectiveTargetValue(i,self.objectives[i].targetValue)
+					self.entity:SetEventFilter(i,self.objectives[i].filter)
+					self.entity:RegisterEvent(i,self.objectives[i].event)
+				end
+			end
+			VGMQuestWizardPanel1TitleDesc:SetWidth(500);
+			VGMQuestWizardPanel1LevelDesc:SetWidth(500);
+			VGMQuestWizardPanel1CategoryDesc:SetWidth(500);
+			VGMQuestWizardPanel2StarterDesc:SetWidth(500);
+			VGMQuestWizardPanel2NextDesc:SetWidth(500);
+			VGMQuestWizardPanel3QuestDesc:SetWidth(500);
+			VGMQuestWizardPanel3SubDesc:SetWidth(500);
+			VGMQuestWizardPanel4SummaryDesc:SetWidth(500);
+			VGMQuestWizardPanel4SubDesc:SetWidth(500);
+			VGMQuestWizardPanel5ProgressDesc:SetWidth(500);
+			VGMQuestWizardPanel5SubDesc:SetWidth(500);
+			VGMQuestWizardPanel6CompletionDesc:SetWidth(500);
+			VGMQuestWizardPanel6SubDesc:SetWidth(500);
+			VGMQuestWizardPanel7ReturnToDesc:SetWidth(500);
+			VGMQuestWizardPanel7SubDesc:SetWidth(500);
+			VGMQuestWizardPanel8TypeDesc:SetWidth(500);
+			VGMQuestWizardPanel8ObjTextDesc:SetWidth(500);
+			VGMQuestWizardPanel8TargetValDesc:SetWidth(500);
+			VGMQuestWizardPanel8FilterDesc:SetWidth(500);
+		</OnLoad>
+	</Scripts>
+	<Frames>
+		<Frame name="$parentPanel1" inherits="VGMWizardPanelTemplate" id="1">
+			<Layers> 
+			  	<Layer level="ARTWORK">
+			  		<FontString name="$parentTitleDesc" hidden="false" inherits="GameFontNormal" text="The title of the quest as it will appear in the player's quest log.">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentTitleLabel" hidden="false" inherits="GameFontNormal" text="Title:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentTitleDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-12"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentLevelDesc" hidden="false" inherits="GameFontNormal" text="The level of the quest. self is only an indication of it's difficulty, a player will be able to get it regardless of his own level.">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-150"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-150"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentLevelLabel" hidden="false" inherits="GameFontNormal" text="Level:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentLevelDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-12"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentCategoryDesc" hidden="false" inherits="GameFontNormal" text="The quest's category. It can be a zone, or you can create a custom one.">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-280"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-280"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentCategoryLabel" hidden="false" inherits="GameFontNormal" text="Category:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentCategoryDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-12"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+			 	</Layer>
+			</Layers> 
+			<Frames>
+				<EditBox name="$parentTitleBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="320" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentTitleLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="15" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxTitle=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+				<EditBox name="$parentLevelBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="30" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentLevelLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="15" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxLevel=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+				<Frame name="$parentCategoryDD" inherits="UIDropDownMenuTemplate">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentCategoryLabel" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="-3" y="-2"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<FontString inherits="ChatFontNormal"/>
+					<Scripts>
+						<OnLoad>
+							local wizard=self:GetParent():GetParent();
+							wizard.dropdownCategory=self
+							VGMQuestWizardPanel1CategoryDDButton:HookScript("OnClick",
+								function()
+									local dewdrop = AceLibrary("Dewdrop-2.0")
+									local x,y=GetCursorPosition();
+									local SetCategory=function(category)
+										wizard.dropdownCategory.category=category
+										UIDropDownMenu_SetText(wizard.dropdownCategory, category);
+									end
+									dewdrop:Open(VGMQuestWizardPanel1CategoryDDButton,
+												'children',	function()
+														local menuTable={};
+														
+																					menuTable[1]={
+																							text="Eastern Kingdoms",
+																							hasArrow=true,
+																							subMenu={},
+																						}
+																					menuTable[2]={
+																							text="Kalimdor",
+																							hasArrow=true,
+																							subMenu={},
+																						}
+																					menuTable[3]={
+																							text="Outlands",
+																							hasArrow=true,
+																							subMenu={},
+																						}
+																					menuTable[4]={
+																							text="Northrend",
+																							hasArrow=true,
+																							subMenu={},
+																						}
+																					menuTable[5]={
+																							text="Battlegrounds",
+																							hasArrow=true,
+																							subMenu={},
+																						}
+																					menuTable[6]={
+																							text="Dungeons",
+																							hasArrow=true,
+																							subMenu={},
+																						}
+																					menuTable[7]={
+																							text="Other",
+																							hasArrow=true,
+																							hasEditBox=true,
+																							editBoxText=wizard.dropdownCategory.category,
+																							editBoxFunc=SetCategory,
+																						}
+																			
+															local BabbleZone=LibStub("LibBabble-Zone-3.0")
+															local b=BabbleZone:GetLookupTable()
+															for i=1,#VerisimilarPl.zoneList.easternKingdoms do
+																tinsert(menuTable[1].subMenu,{	text=b[VerisimilarPl.zoneList.easternKingdoms[i]],
+																									checked=(wizard.dropdownCategory.category==b[VerisimilarPl.zoneList.easternKingdoms[i]]),
+																									func=SetCategory,
+																									arg1=b[VerisimilarPl.zoneList.easternKingdoms[i]],
+																								});
+															end
+															for i=1,#VerisimilarPl.zoneList.kalimdor do
+																tinsert(menuTable[2].subMenu,{	text=b[VerisimilarPl.zoneList.kalimdor[i]],
+																									checked=(wizard.dropdownCategory.category==b[VerisimilarPl.zoneList.kalimdor[i]]),
+																									func=SetCategory,
+																									arg1=b[VerisimilarPl.zoneList.kalimdor[i]],
+																								});
+															end
+															for i=1,#VerisimilarPl.zoneList.outlands do
+																tinsert(menuTable[3].subMenu,{	text=b[VerisimilarPl.zoneList.outlands[i]],
+																									checked=(wizard.dropdownCategory.category==b[VerisimilarPl.zoneList.outlands[i]]),
+																									func=SetCategory,
+																									arg1=b[VerisimilarPl.zoneList.outlands[i]],
+																								});
+															end
+															for i=1,#VerisimilarPl.zoneList.northrend do
+																tinsert(menuTable[4].subMenu,{	text=b[VerisimilarPl.zoneList.northrend[i]],
+																									checked=(wizard.dropdownCategory.category==b[VerisimilarPl.zoneList.northrend[i]]),
+																									func=SetCategory,
+																									arg1=b[VerisimilarPl.zoneList.northrend[i]],
+																								});
+															end
+															for i=1,#VerisimilarPl.zoneList.battlegrounds do
+																tinsert(menuTable[5].subMenu,{	text=b[VerisimilarPl.zoneList.battlegrounds[i]],
+																									checked=(wizard.dropdownCategory.category==b[VerisimilarPl.zoneList.battlegrounds[i]]),
+																									func=SetCategory,
+																									arg1=b[VerisimilarPl.zoneList.battlegrounds[i]],
+																								});
+															end
+															dewdrop:FeedTable(menuTable);
+												
+								end
+								
+							);
+							end
+							);
+						</OnLoad>
+						<OnShow>
+							UIDropDownMenu_SetWidth(self, 110);
+						</OnShow>
+					</Scripts>
+				</Frame>
+			</Frames>
+		</Frame>
+		<Frame name="$parentPanel2" inherits="VGMWizardPanelTemplate" id="2">
+			<Layers> 
+			  	<Layer level="ARTWORK">
+			  		<FontString name="$parentStarterDesc" hidden="false" inherits="GameFontNormal" text="Select the quest giver and ender for self quest (Can be the same NPC). You must have provided text for the greeting option in ordet for self NPC to be able to give out or finish quests.">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentStarterLabel" hidden="false" inherits="GameFontNormal" text="Starts from:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentStarterDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-12"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentEnderLabel" hidden="false" inherits="GameFontNormal" text="Ends at:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentStarterLabel" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-18"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentNextDesc" hidden="false" inherits="GameFontNormal" text="In order to create quest chains, you must select the previous and next quests for self one. self quest will be available only when the previous one is completed, and once the player completes self one, he will automatically be offered the next one.">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-170"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-170"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentPreviousQuestLabel" hidden="false" inherits="GameFontNormal" text="Previous Quest:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentNextDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-12"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentNextQuestLabel" hidden="false" inherits="GameFontNormal" text="Next Quest:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentPreviousQuestLabel" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-18"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+			 	</Layer>
+			</Layers> 
+			<Frames>
+				<Frame name="$parentStarterDD" inherits="UIDropDownMenuTemplate">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentStarterLabel" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="-3" y="-2"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<FontString inherits="ChatFontNormal"/>
+					<Scripts>
+						<OnLoad>
+							local wizard=self:GetParent():GetParent();
+							wizard.dropdownStarter=self
+							VGMQuestWizardPanel2StarterDDButton:HookScript("OnClick",
+								function()
+									local dewdrop = AceLibrary("Dewdrop-2.0")
+									local x,y=GetCursorPosition();
+									local SetStarter=function(starter)
+										wizard.dropdownStarter.starter=starter
+										UIDropDownMenu_SetText(wizard.dropdownStarter, starter or "none");
+									end
+									dewdrop:Open(VGMQuestWizardPanel2StarterDDButton,
+												'children',	function()
+														local menuTable={};
+														for _,npc in pairs(wizard.entity:GetSession().NPCs) do
+															tinsert(menuTable,{	text=npc.id,
+																				checked=(wizard.dropdownStarter.starter==npc.id),
+																				func=SetStarter,
+																				arg1=npc.id,
+																				});
+														end
+														for _,item in pairs(wizard.entity:GetSession().Items) do
+															tinsert(menuTable,{	text=item.id,
+																				checked=(wizard.dropdownStarter.starter==item.id),
+																				func=SetStarter,
+																				arg1=item.id,
+																				});
+														end
+														tinsert(menuTable,{		text="none",
+																				checked=(wizard.dropdownStarter.starter==nil),
+																				func=SetStarter,
+																				arg1=nil,
+																				});
+																					
+															dewdrop:FeedTable(menuTable);
+												
+								end
+								
+							);
+							end
+							);
+						</OnLoad>
+						<OnShow>
+							UIDropDownMenu_SetWidth(self, 110);
+						</OnShow>
+					</Scripts>
+				</Frame>
+				<Frame name="$parentEnderDD" inherits="UIDropDownMenuTemplate">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentEnderLabel" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="21" y="-2"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<FontString inherits="ChatFontNormal"/>
+					<Scripts>
+						<OnLoad>
+							local wizard=self:GetParent():GetParent();
+							wizard.dropdownEnder=self
+							VGMQuestWizardPanel2EnderDDButton:HookScript("OnClick",
+								function()
+									local dewdrop = AceLibrary("Dewdrop-2.0")
+									local x,y=GetCursorPosition();
+									local SetEnder=function(ender)
+										wizard.dropdownEnder.ender=ender
+										UIDropDownMenu_SetText(wizard.dropdownEnder, ender or "none");
+									end
+									dewdrop:Open(VGMQuestWizardPanel2EnderDDButton,
+												'children',	function()
+														local menuTable={};
+														for _,npc in pairs(wizard.entity:GetSession().NPCs) do
+															tinsert(menuTable,{	text=npc.id,
+																				checked=(wizard.dropdownEnder.ender==npc.id),
+																				func=SetEnder,
+																				arg1=npc.id,
+																				});
+														end
+														for _,item in pairs(wizard.entity:GetSession().Items) do
+															tinsert(menuTable,{	text=item.id,
+																				checked=(wizard.dropdownEnder.ender==item.id),
+																				func=SetEnder,
+																				arg1=item.id,
+																				});
+														end
+														tinsert(menuTable,{		text="none",
+																				checked=(wizard.dropdownEnder.ender==nil),
+																				func=SetEnder,
+																				arg1=nil,
+																				});
+																					
+															dewdrop:FeedTable(menuTable);
+												
+								end
+								
+							);
+							end
+							);
+						</OnLoad>
+						<OnShow>
+							UIDropDownMenu_SetWidth(self, 110);
+						</OnShow>
+					</Scripts>
+				</Frame>
+				<Frame name="$parentPreviousQuestDD" inherits="UIDropDownMenuTemplate">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentPreviousQuestLabel" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="-3" y="-2"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<FontString inherits="ChatFontNormal"/>
+					<Scripts>
+						<OnLoad>
+							local wizard=self:GetParent():GetParent();
+							wizard.dropdownPrevQuest=self
+							VGMQuestWizardPanel2PreviousQuestDDButton:HookScript("OnClick",
+								function()
+									local dewdrop = AceLibrary("Dewdrop-2.0")
+									local x,y=GetCursorPosition();
+									local SetPrev=function(previous)
+										wizard.dropdownPrevQuest.previous=previous
+										UIDropDownMenu_SetText(wizard.dropdownPrevQuest, previous or "none");
+									end
+									dewdrop:Open(VGMQuestWizardPanel2PreviousQuestDDButton,
+												'children',	function()
+														local menuTable={};
+														for _,quest in pairs(wizard.entity:GetSession().Quests) do
+															tinsert(menuTable,{	text=quest.id,
+																									checked=(wizard.dropdownPrevQuest.previous==quest.id),
+																									func=SetPrev,
+																									arg1=quest.id,
+																								});
+														end
+														tinsert(menuTable,{		text="none",
+																									checked=(wizard.dropdownPrevQuest.previous==nil),
+																									func=SetPrev,
+																									arg1=nil,
+																								});
+																					
+															dewdrop:FeedTable(menuTable);
+												
+								end
+								
+							);
+							end
+							);
+						</OnLoad>
+						<OnShow>
+							UIDropDownMenu_SetWidth(self, 110);
+						</OnShow>
+					</Scripts>
+				</Frame>
+				<Frame name="$parentNextQuestDD" inherits="UIDropDownMenuTemplate">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentNextQuestLabel" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="20" y="-2"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<FontString inherits="ChatFontNormal"/>
+					<Scripts>
+						<OnLoad>
+							local wizard=self:GetParent():GetParent();
+							wizard.dropdownNextQuest=self
+							VGMQuestWizardPanel2NextQuestDDButton:HookScript("OnClick",
+								function()
+									local dewdrop = AceLibrary("Dewdrop-2.0")
+									local x,y=GetCursorPosition();
+									local SetNext=function(next)
+										wizard.dropdownNextQuest.next=next
+										UIDropDownMenu_SetText(wizard.dropdownNextQuest, next or "none");
+									end
+									dewdrop:Open(VGMQuestWizardPanel2NextQuestDDButton,
+												'children',	function()
+														local menuTable={};
+														for _,quest in pairs(wizard.entity:GetSession().Quests) do
+															tinsert(menuTable,{	text=quest.id,
+																									checked=(wizard.dropdownNextQuest.next==quest.id),
+																									func=SetNext,
+																									arg1=quest.id,
+																								});
+														end
+														tinsert(menuTable,{		text="none",
+																									checked=(wizard.dropdownNextQuest.next==nil),
+																									func=SetNext,
+																									arg1=nil,
+																								});
+																					
+															dewdrop:FeedTable(menuTable);
+												
+								end
+								
+							);
+							end
+							);
+						</OnLoad>
+						<OnShow>
+							UIDropDownMenu_SetWidth(self, 110);
+						</OnShow>
+					</Scripts>
+				</Frame>
+			</Frames>
+		</Frame>
+		<Frame name="$parentPanel3" inherits="VGMWizardPanelTemplate" id="3">
+			<Layers> 
+			  	<Layer level="ARTWORK">
+			  		<FontString name="$parentQuestDesc" hidden="false" inherits="GameFontNormal" text="Enter the quest description, as told by the quest giver. self is the text that appears before a player clicks the Accept button.">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentSubDesc" hidden="false" inherits="GameFontNormal" text="Substitution strings: %fn (first name), %ln (last name), %nn(nickname), %rk (rank), %tl (title), %gr (gender), %rc (race) and %cl (class)">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-60"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-60"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+			 	</Layer>
+			</Layers> 
+			<Frames>
+				<EditBox name="$parentQuestTextBox" autoFocus="false" multiLine="true">
+				   
+				    <Anchors>
+				        <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+							<Offset>
+								<AbsDimension x="10" y="-90"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-10" y="20"/>
+							</Offset>
+						</Anchor>
+				    </Anchors> 
+				    <FontString inherits="GameFontHighlightSmall"/>
+				    <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+						<EdgeSize>
+							<AbsValue val="1"/>
+						</EdgeSize>
+						<TileSize>
+							<AbsValue val="16"/>
+						</TileSize>
+						<BackgroundInsets>
+							<AbsInset left="0" right="0" top="0" bottom="0"/>
+						</BackgroundInsets>
+					</Backdrop>  
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxQuestText=self
+							self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
+							self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+			</Frames>
+		</Frame>
+		<Frame name="$parentPanel4" inherits="VGMWizardPanelTemplate" id="4">
+			<Layers> 
+			  	<Layer level="ARTWORK">
+			  		<FontString name="$parentSummaryDesc" hidden="false" inherits="GameFontNormal" text="Enter the objectives summary. self is the short text that provides a brief explanation of the objectives (ie 'Some Guy wants you to kill So-and-So').">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentSubDesc" hidden="false" inherits="GameFontNormal" text="Substitution strings: %fn (first name), %ln (last name), %nn(nickname), %rk (rank), %tl (title), %gr (gender), %rc (race) and %cl (class)">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-60"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-60"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+			 	</Layer>
+			</Layers> 
+			<Frames>
+				<EditBox name="$parentSummaryTextBox" autoFocus="false" multiLine="true">
+				   
+				    <Anchors>
+				        <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+							<Offset>
+								<AbsDimension x="10" y="-90"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-10" y="20"/>
+							</Offset>
+						</Anchor>
+				    </Anchors> 
+				    <FontString inherits="GameFontHighlightSmall"/>
+				    <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+						<EdgeSize>
+							<AbsValue val="1"/>
+						</EdgeSize>
+						<TileSize>
+							<AbsValue val="16"/>
+						</TileSize>
+						<BackgroundInsets>
+							<AbsInset left="0" right="0" top="0" bottom="0"/>
+						</BackgroundInsets>
+					</Backdrop>  
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxSummaryText=self
+							self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
+							self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+			</Frames>
+		</Frame>
+		<Frame name="$parentPanel5" inherits="VGMWizardPanelTemplate" id="5">
+			<Layers> 
+			  	<Layer level="ARTWORK">
+			  		<FontString name="$parentProgressDesc" hidden="false" inherits="GameFontNormal" text="Enter the progress text. self text appears when talking to the quest ender without having completed the objectives yet, or before hitting the Continue button (ie 'Is So-and-So dead yet?').">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentSubDesc" hidden="false" inherits="GameFontNormal" text="Substitution strings: %fn (first name), %ln (last name), %nn(nickname), %rk (rank), %tl (title), %gr (gender), %rc (race) and %cl (class)">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-60"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-60"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+			 	</Layer>
+			</Layers> 
+			<Frames>
+				<EditBox name="$parentProgressTextBox" autoFocus="false" multiLine="true">
+				   
+				    <Anchors>
+				        <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+							<Offset>
+								<AbsDimension x="10" y="-90"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-10" y="20"/>
+							</Offset>
+						</Anchor>
+				    </Anchors> 
+				    <FontString inherits="GameFontHighlightSmall"/>
+				    <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+						<EdgeSize>
+							<AbsValue val="1"/>
+						</EdgeSize>
+						<TileSize>
+							<AbsValue val="16"/>
+						</TileSize>
+						<BackgroundInsets>
+							<AbsInset left="0" right="0" top="0" bottom="0"/>
+						</BackgroundInsets>
+					</Backdrop>  
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxProgressText=self
+							self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
+							self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+			</Frames>
+		</Frame>
+		<Frame name="$parentPanel6" inherits="VGMWizardPanelTemplate" id="6">
+			<Layers> 
+			  	<Layer level="ARTWORK">
+			  		<FontString name="$parentCompletionDesc" hidden="false" inherits="GameFontNormal" text="Enter the completion text, which appears when the player is ready to complete the quest (click the Complete button)">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentSubDesc" hidden="false" inherits="GameFontNormal" text="Substitution strings: %fn (first name), %ln (last name), %nn(nickname), %rk (rank), %tl (title), %gr (gender), %rc (race) and %cl (class)">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-60"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-60"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+			 	</Layer>
+			</Layers> 
+			<Frames>
+				<EditBox name="$parentCompletionTextBox" autoFocus="false" multiLine="true">
+				   
+				    <Anchors>
+				        <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+							<Offset>
+								<AbsDimension x="10" y="-90"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-10" y="20"/>
+							</Offset>
+						</Anchor>
+				    </Anchors> 
+				    <FontString inherits="GameFontHighlightSmall"/>
+				    <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+						<EdgeSize>
+							<AbsValue val="1"/>
+						</EdgeSize>
+						<TileSize>
+							<AbsValue val="16"/>
+						</TileSize>
+						<BackgroundInsets>
+							<AbsInset left="0" right="0" top="0" bottom="0"/>
+						</BackgroundInsets>
+					</Backdrop>  
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxCompletionText=self
+							self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
+							self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+			</Frames>
+		</Frame>
+		<Frame name="$parentPanel7" inherits="VGMWizardPanelTemplate" id="7">
+			<Layers> 
+			  	<Layer level="ARTWORK">
+			  		<FontString name="$parentReturnToDesc" hidden="false" inherits="GameFontNormal" text="Enter the return-to text, which appears in the quest watch frame when you have completed all the objectives">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentSubDesc" hidden="false" inherits="GameFontNormal" text="Substitution strings: %fn (first name), %ln (last name), %nn(nickname), %rk (rank), %tl (title), %gr (gender), %rc (race) and %cl (class)">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-60"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-60"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+			 	</Layer>
+			</Layers> 
+			<Frames>
+				<EditBox name="$parentReturnToTextBox" autoFocus="false" multiLine="true">
+				   
+				    <Anchors>
+				        <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+							<Offset>
+								<AbsDimension x="10" y="-90"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-10" y="20"/>
+							</Offset>
+						</Anchor>
+				    </Anchors> 
+				    <FontString inherits="GameFontHighlightSmall"/>
+				    <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+						<EdgeSize>
+							<AbsValue val="1"/>
+						</EdgeSize>
+						<TileSize>
+							<AbsValue val="16"/>
+						</TileSize>
+						<BackgroundInsets>
+							<AbsInset left="0" right="0" top="0" bottom="0"/>
+						</BackgroundInsets>
+					</Backdrop>  
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxReturnToText=self
+							self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
+							self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+					</Scripts>			
+				</EditBox>
+			</Frames>
+		</Frame>
+		<Frame name="$parentPanel8" inherits="VGMWizardPanelTemplate" id="8">
+			<Layers> 
+			  	<Layer level="ARTWORK">
+			  		<FontString name="$parentObjectivesDesc" hidden="false" inherits="GameFontNormal" text="Here you can add the objectives for your quest.">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentObjectiveLabel" hidden="false" inherits="GameFontNormal" text="Objective:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentObjectivesDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentEventDesc" hidden="false" inherits="GameFontNormal" text="Select the objective type.">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-80"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-80"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentTypeLabel" hidden="false" inherits="GameFontNormal" text="Type:">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentEventDesc" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentTypeDesc" hidden="false" inherits="GameFontNormal" >
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-140"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-140"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentObjTextDesc" hidden="false" inherits="GameFontNormal" >
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-170"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-170"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentObjTextLabel" hidden="false" inherits="GameFontNormal" text="Objective Text:" >
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-200"/>
+								</Offset>
+							</Anchor>
+						</Anchors>		
+					</FontString>
+					<FontString name="$parentTargetValDesc" hidden="false" inherits="GameFontNormal" >
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-220"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-220"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentTargetValLabel" hidden="false" inherits="GameFontNormal" text="Target Value:" >
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-250"/>
+								</Offset>
+							</Anchor>
+						</Anchors>		
+					</FontString>
+					<FontString name="$parentFilterDesc" hidden="false" inherits="GameFontNormal" >
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-280"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="TOPRIGHT">	
+								<Offset>
+									<AbsDimension x="0" y="-280"/>
+								</Offset>
+							</Anchor>
+						</Anchors>			
+					</FontString>
+					<FontString name="$parentFilterLabel" hidden="false" inherits="GameFontNormal" text="Filter:" >
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-320"/>
+								</Offset>
+							</Anchor>
+						</Anchors>		
+					</FontString>
+			 	</Layer>
+			</Layers> 
+			<Frames>
+				<Frame name="$parentObjectivesListDD" inherits="UIDropDownMenuTemplate">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentObjectiveLabel" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="-10" y="-3"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<FontString inherits="ChatFontNormal"/>
+					<Scripts>
+						<OnLoad>
+							local wizard=self:GetParent():GetParent();
+							wizard.dropdownObjectivesList=self
+							VGMQuestWizardPanel8ObjectivesListDDButton:HookScript("OnClick",
+								function()
+									local dewdrop = AceLibrary("Dewdrop-2.0")
+									local x,y=GetCursorPosition();
+									dewdrop:Open(VGMQuestWizardPanel8ObjectivesListDDButton,
+												'children',	function()
+																local menuTable={};
+																for i=1,#wizard.objectives do
+																	tinsert(menuTable,{	text=i,
+																						checked=(wizard.currentObjective==i),
+																						func=wizard.setObjective,
+																						arg1=i
+																						});
+																end
+																dewdrop:FeedTable(menuTable);
+												
+															end
+								
+												);
+									
+							end
+							);
+						</OnLoad>
+						<OnShow>
+							UIDropDownMenu_SetWidth(self, 110);
+						</OnShow>
+					</Scripts>
+				</Frame>
+				<Button name="$parentNewObjectiveButton" inherits="UIPanelButtonTemplate" text="New Objective" >
+				    <Size>
+						<AbsDimension x="120" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentObjectivesListDD" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-5" y="3"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnClick> 
+				    		AceLibrary("Dewdrop-2.0"):Close()
+				    		local wizard=self:GetParent():GetParent();
+				    		tinsert(wizard.objectives,{text="",event="Kill",targetValue=1,filter=""})
+				    		wizard.setObjective(#wizard.objectives)
+				    	</OnClick>
+				    </Scripts>
+				</Button>
+				<Button name="$parentDeleteObjectiveButton" inherits="UIPanelButtonTemplate" text="Delete Objective" >
+				    <Size>
+						<AbsDimension x="120" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentNewObjectiveButton" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="10" y="0"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnLoad>
+				    		local wizard=self:GetParent():GetParent();
+							wizard.deleteObjectiveButton=self
+				    	</OnLoad>
+				    	<OnClick> 
+				    		AceLibrary("Dewdrop-2.0"):Close()
+				    		local wizard=self:GetParent():GetParent();
+				    		tremove(wizard.objectives,wizard.currentObjective);
+				    		if(wizard.currentObjective>#wizard.objectives)then
+				    			wizard.currentObjective=wizard.currentObjective-1;
+				    		end
+				    		wizard.setObjective(wizard.currentObjective)
+				    	</OnClick>
+				    </Scripts>
+				</Button>
+				<Frame name="$parentEventListDD" inherits="UIDropDownMenuTemplate">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentTypeLabel" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="-10" y="-3"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<FontString inherits="ChatFontNormal"/>
+					<Scripts>
+						<OnLoad>
+							local wizard=self:GetParent():GetParent();
+							wizard.dropdownEventList=self
+							wizard.dropdownEventList.button=VGMQuestWizardPanel8EventListDDButton;
+							
+							wizard.dropdownEventList.button:HookScript("OnClick",
+								function()
+									local dewdrop = AceLibrary("Dewdrop-2.0")
+									local x,y=GetCursorPosition();
+									dewdrop:Open(wizard.dropdownEventList.button,
+												'children',	function()
+																local menuTable={};
+																for i=1,#VerisimilarPl.eventList do
+																	tinsert(menuTable,{	text=VerisimilarPl.eventList[i],
+																						checked=(wizard.objectives[wizard.currentObjective].event==VerisimilarPl.eventList[i]),
+																						func=wizard.setEvent,
+																						arg1=VerisimilarPl.eventList[i],
+																						arg2=wizard.currentObjective,
+																						});
+																end
+																dewdrop:FeedTable(menuTable);
+												
+															end
+								
+												);
+									
+							end
+							);
+						</OnLoad>
+						<OnShow>
+							UIDropDownMenu_SetWidth(self, 110);
+						</OnShow>
+					</Scripts>
+				</Frame>
+				<EditBox name="$parentObjTextBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="300" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentObjTextLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="15" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxObjText=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+						<OnTextChanged>
+							local wizard=self:GetParent():GetParent()
+							if(wizard.objectives[wizard.currentObjective])then
+								wizard.objectives[wizard.currentObjective].text=self:GetText()
+							end
+						</OnTextChanged>
+					</Scripts>			
+				</EditBox>
+				<EditBox name="$parentTargetValBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="30" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentTargetValLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="15" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxTargetVal=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+						<OnTextChanged>
+							local wizard=self:GetParent():GetParent()
+							if(wizard.objectives[wizard.currentObjective])then
+								wizard.objectives[wizard.currentObjective].targetValue=self:GetText()
+							end
+						</OnTextChanged>
+					</Scripts>			
+				</EditBox>
+				<EditBox name="$parentFilterBox" inherits="InputBoxTemplate" autoFocus="false">
+				    <Size>
+						<AbsDimension x="300" y="26"/>
+				    </Size>
+				    <Anchors>
+				        <Anchor point="LEFT" relativeTo="$parentFilterLabel" relativePoint="RIGHT">
+				            <Offset>
+				                <AbsDimension x="15" y="-2"/>
+				            </Offset>
+				        </Anchor>
+				    </Anchors>   
+					<Scripts>
+						<OnLoad>
+							self:GetParent():GetParent().editboxFilter=self
+						</OnLoad>
+						<OnEscapePressed>
+							self:ClearFocus();
+						</OnEscapePressed>
+						<OnEditFocusGained>
+							self:HighlightText();
+						</OnEditFocusGained>
+						<OnTextChanged>
+							local wizard=self:GetParent():GetParent()
+							if(wizard.objectives[wizard.currentObjective])then
+								wizard.objectives[wizard.currentObjective].filter=self:GetText()
+							end
+						</OnTextChanged>
+					</Scripts>			
+				</EditBox>
+				<Button name="$parentDefaultFilterButton" inherits="UIPanelButtonTemplate" >
+				    <Size>
+						<AbsDimension x="200" y="26"/>
+				    </Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentFilterBox" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-26"/>
+								</Offset>
+						</Anchor>
+					</Anchors>
+				    <Scripts>
+				    	<OnLoad>
+				    		local wizard=self:GetParent():GetParent();
+							wizard.defaultFilterButton=self
+				    	</OnLoad>
+				    	<OnClick> 
+				    		AceLibrary("Dewdrop-2.0"):Close()
+				    		local wizard=self:GetParent():GetParent();
+							local session=VerisimilarGM.db.global.sessions[wizard.entity.sessionName]
+							if(wizard.objectives[wizard.currentObjective].event=="Item")then
+									local dewdrop = AceLibrary("Dewdrop-2.0")
+									local x,y=GetCursorPosition();
+									local setItemId=function(id,objNum)
+														wizard.editboxFilter:SetText(id)
+													end
+									dewdrop:Open(self,
+												'children',	function()
+																local menuTable={};
+																for id,_ in pairs(session.Items) do
+																	tinsert(menuTable,{	text=id,
+																						func=setItemId,
+																						arg1=id,
+																						arg2=wizard.currentObjective,
+																						});
+																end
+																dewdrop:FeedTable(menuTable);
+												
+															end
+								
+												);
+							else
+								local text={
+											["Kill"]=UnitName("target") or "",
+											["Subzone"]=GetMinimapZoneText() or "",
+											["Script"]="Q_"..wizard.entity.id.."_Obj"..wizard.currentObjective,
+											}
+								wizard.editboxFilter:SetText(text[wizard.objectives[wizard.currentObjective].event])
+							end
+				    	</OnClick>
+				    </Scripts>
+				</Button>
+			</Frames>
+		</Frame>
+		
+	</Frames>
+</Frame>
+</Ui>

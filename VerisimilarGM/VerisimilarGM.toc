@@ -1,0 +1,52 @@
+## Interface: 40000
+## Title: VerisimilarGM
+## Author: Erethas (Moonglade EU)
+## Version: 0.16
+## Notes: Act as a GM in an RP environment
+## eMail: rexides@gmail.com
+## X-Email: rexides@gmail.com
+## SavedVariables: VerisimilarGMDB
+## Dependencies: VerisimilarPlayer
+## OptionalDeps: Ace3
+## X-Embeds: Ace3
+## X-Category: Miscellaneous
+## DefaultState: Enabled
+
+VGMMainFrame.xml
+VGMElementPanelTemplates.xml
+IconChooser.xml
+TextEntry.xml
+
+
+WizardTemplate.xml
+NPCWizard.xml
+NPCChatWindow.xml
+
+QuestWizard.xml
+
+VGMcore.lua
+VGMInterface.lua
+VGMElementPanelControls.lua
+VGMPlayerPanel.lua
+VGMSessionPanel.lua
+VGMQuestPanel.lua
+
+VGMItemPanel.lua
+VGMNPCPanel.lua
+VGMMobPanel.lua
+VGMAreaPanel.lua
+VGMSessionFuncs.lua
+VGMCommunication.lua
+
+VGMQuestFuncs.lua
+VGMItemFuncs.lua
+VGMNPCFuncs.lua
+VGMMobFuncs.lua
+VGMAreaFuncs.lua
+NPCChatWindow.lua
+IconChooser.lua
+Icons.lua
+DemoSession.lua
+
+
+

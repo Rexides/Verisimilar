@@ -1,0 +1,244 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+<Button name="VGMFrameTabTemplate" inherits="CharacterFrameTabButtonTemplate" virtual="true">
+	<Scripts>
+		<OnClick>
+			VerisimilarGM:TabButtonHandler(self:GetText());
+		</OnClick>
+	</Scripts>
+</Button>
+
+<Button name="VGMElementListButtonTemplate" inherits="OptionsListButtonTemplate" virtual="true">
+	<Scripts>
+		<OnLoad>
+			OptionsListButton_OnLoad(self, function() VerisimilarGM:ToggleElementListEntry(self.element); end);
+		</OnLoad>
+		<OnClick>
+			PlaySound("igMainMenuOptionCheckBoxOn");
+			local parent=self:GetParent();
+			
+			OptionsList_ClearSelection(parent, parent.buttons);
+			OptionsList_SelectButton(parent, self);
+			--VerisimilarGM:UpdateInterface();
+			VerisimilarGM:SetPanelToElement(self.element.element)
+		</OnClick>
+			
+		<OnEnter>
+			VerisimilarGM:ShowElementTooltip(self,self.element.element)
+		</OnEnter>
+		<OnLeave>
+			GameTooltip:Hide();
+			GameTooltip:ClearLines();
+		</OnLeave>
+	</Scripts>
+</Button>
+
+<Button name="VGMMenuBarButtonTemplate" inherits="UIPanelButtonTemplate2" virtual="true">
+	<Scripts>
+		<OnClick>
+			VerisimilarGM:MenuButtonClicked(self);
+		</OnClick>
+	</Scripts>	
+</Button>
+
+<Frame name="VGMMainFrame" hidden="true" toplevel="false" frameStrata="MEDIUM" inherits="BasicFrameTemplateWithInset" movable="true" parent="UIParent">
+	<Size>
+		<AbsDimension x="950" y="700"/>
+	</Size>
+	<Anchors>
+		<Anchor point="CENTER"/>
+	</Anchors>
+	<Frames>
+		<Frame name="$parentElementList" inherits="OptionsFrameListTemplate" parentKey="elementList">
+			<Size>
+				<AbsDimension x="175" y="600" />
+			</Size>
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="$parentInsetBg">
+					<Offset>
+						<AbsDimension x="5" y="-5"/>
+					</Offset>
+				</Anchor>
+				<!--<Anchor point="BOTTOMLEFT" relativeTo="$parentInsetBg">
+					<Offset>
+						<AbsDimension x="5" y="60"/>
+					</Offset>
+				</Anchor>-->
+			</Anchors>
+			<Scripts>
+				<OnLoad>
+					OptionsList_OnLoad(self, "VGMElementListButtonTemplate");
+					self.update=function() VerisimilarGM:UpdateElementList() end
+					
+					self.list=getglobal(self:GetName().."List");
+					self.list:SetPoint("LEFT");
+					local scrollbar=getglobal(self.list:GetName().."ScrollBar");
+					scrollbar:ClearAllPoints();
+					scrollbar:SetPoint("TOPRIGHT",-3,-20);
+					scrollbar:SetPoint("BOTTOMRIGHT",-27,19);
+					scrollbar:SetFrameLevel(self.buttons[1]:GetFrameLevel()-1);
+					for i=1,#self.buttons do
+						self.buttons[i]:SetPoint("RIGHT",scrollbar,"LEFT");
+					end
+					self.entries={};
+					--self.labelText = ADDONS
+					
+					
+				</OnLoad>
+			</Scripts>
+		</Frame>
+		<EditBox name="$parentElementFilter" parentKey="elementFilter" inherits="InputBoxTemplate" autoFocus="false">
+			<Size>
+                <AbsDimension x="135" y="26"/>
+            </Size>
+			<Anchors>
+				<Anchor point="BOTTOMLEFT">
+					<Offset x="15" y="10"/>
+				</Anchor>
+			</Anchors>
+			<Layers>
+				<Layer level="OVERLAY">
+					<FontString name="$parentText" inherits="GameFontHighlightSmall" text="Element filter">
+						<Anchors>
+							<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</FontString>
+				</Layer>
+			</Layers>
+			<Scripts>
+				<OnTextChanged>
+					VerisimilarGM:ElementFilterTextChanged(self);
+				</OnTextChanged>
+				<OnEnterPressed>
+					self:ClearFocus();
+				</OnEnterPressed>
+				<OnTabPressed>
+					self:ClearFocus();
+				</OnTabPressed>
+			</Scripts>
+		</EditBox>
+		<Button name="$parentClearFilter" inherits="UIPanelCloseButton">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="$parentElementFilter" relativePoint="TOPRIGHT">
+					<Offset x="3" y="3"/>
+				</Anchor>
+			</Anchors>
+			<Scripts>
+				<OnClick>
+					self:GetParent().elementFilter:SetText("");
+					self:GetParent().elementFilter:ClearFocus();
+				</OnClick>
+			</Scripts>	
+		</Button>
+		<Frame name="$parentPanelContainer" parentKey="controlPanel">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="$parentElementList" relativePoint="TOPRIGHT">
+					<Offset>
+						<AbsDimension x="10" y="0"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="BOTTOMRIGHT" relativeTo="$parentInsetBg" relativePoint="BOTTOMRIGHT">
+					<Offset>
+						<AbsDimension x="-5" y="5"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+			<Layers>
+				<Layer level="OVERLAY">
+					<FontString name="$parentText" parentKey="title" inherits="GameFontNormalLarge" text="">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-10"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</FontString>
+				</Layer>
+			</Layers>
+			<Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+				<EdgeSize>
+					<AbsValue val="16"/>
+				</EdgeSize>
+				<TileSize>
+					<AbsValue val="16"/>
+				</TileSize>
+				<BackgroundInsets>
+					<AbsInset left="5" right="5" top="5" bottom="5"/>
+				</BackgroundInsets>
+			</Backdrop>
+			<Frames>
+				<CheckButton name="$parentCheckEnabled" inherits="UIRadioButtonTemplate" parentKey="checkEnabled">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentText" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-10"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<Scripts>
+						<OnLoad>
+							getglobal(self:GetName().."Text"):SetText("Enabled");
+						</OnLoad>
+						<OnClick>
+							self:SetChecked(true);
+							self:GetParent().checkDisabled:SetChecked(false);
+							local element=VGMMainFrame.controlPanel.element;
+							if(not element:IsEnabled())then
+								VerisimilarGM:HideElementPanels();
+								element:Enable();
+								VerisimilarGM:UpdateElementList();
+								VerisimilarGM:SetPanelToElement(element);
+							end
+						</OnClick>
+					</Scripts>
+				</CheckButton>
+				<CheckButton name="$parentCheckDisabled" inherits="UIRadioButtonTemplate" parentKey="checkDisabled">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentCheckEnabledText" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="30" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<Scripts>
+						<OnLoad>
+							getglobal(self:GetName().."Text"):SetText("Disabled");
+						</OnLoad>
+						<OnClick>
+							self:SetChecked(true);
+							self:GetParent().checkEnabled:SetChecked(false);
+							local element=VGMMainFrame.controlPanel.element;
+							if(element:IsEnabled())then
+								element:Disable();
+								VerisimilarGM:UpdateElementList();
+								VerisimilarGM:SetPanelToElement(element);
+							end
+						</OnClick>
+					</Scripts>
+				</CheckButton>
+			</Frames>
+			<Scripts>
+				<OnLoad>
+					self:SetBackdropBorderColor(.6, .6, .6, 1);
+					self.panels={};
+				</OnLoad>
+			</Scripts>
+		</Frame>
+	</Frames>
+	<Scripts>
+		<OnLoad> 
+			self.InsetBg:SetPoint("TOPLEFT",4,-44);
+		</OnLoad>
+		<OnMouseDown> self:StartMoving();  </OnMouseDown>
+		<OnMouseUp>  self:StopMovingOrSizing();	</OnMouseUp>
+		<OnDragStop> self:StopMovingOrSizing(); </OnDragStop>
+	</Scripts>
+  </Frame>
+  
+ </Ui>
