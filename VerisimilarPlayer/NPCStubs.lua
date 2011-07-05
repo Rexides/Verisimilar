@@ -458,7 +458,7 @@ function VerisimilarPl:SelectGossipAvailableQuest(index)
 end
 
 function VerisimilarPl:GetAvailableQuestInfo(index)
-	--VerisimilarPl:Print(index)
+	--VerisimilarPl:PrintDebug(index)
 	local numWoWQuests=self.hooks.GetNumGossipAvailableQuests();
 	if(index>numWoWQuests)then
 		return nil,nil,nil
@@ -495,7 +495,7 @@ function VerisimilarPl:GetNumGossipOptions()
 end
 
 function VerisimilarPl:SendGossipOption(option)
-	self:Print(option.text,option.choice)
+	self:PrintDebug(option.text,option.choice)
 	local curTime=GetTime();
 	if(option.lastClicked+3>curTime)then return end --Antispam measures
 	option.lastClicked=curTime;

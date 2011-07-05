@@ -189,7 +189,7 @@ local gainMessages={
 function VerisimilarPl:ITEM_AMOUNT(stub,amountInfo)
 	local gainType=strsub(amountInfo,1,1);
 	local amount=tonumber(strsub(amountInfo,2));
-	self:Print("Item amount",stub.name,amount);
+	self:PrintDebug("Item amount",stub.name,amount);
 	local difference=amount-stub.amount;
 	stub.amount=amount;
 	
@@ -311,7 +311,7 @@ end
 
 function VerisimilarPl:GiveItemTo(stub, playerName, amount)
 	if(stub)then
-		self:Print("Destroy item func")
+		self:PrintDebug("Destroy item func")
 		self:SendSessionMessage(stub.session,stub,"GIVE_ITEM_TO_OTHER_PLAYER",{p=playerName,a=tonumber(amount)});
 	end
 end

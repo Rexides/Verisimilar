@@ -1,4 +1,4 @@
-## Interface: 40000
+## Interface: 40200
 ## Title: VerisimilarPlayer
 ## Author: Erethas (Moonglade EU)
 ## Version: 0.16

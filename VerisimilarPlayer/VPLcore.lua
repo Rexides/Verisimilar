@@ -33,6 +33,9 @@ local defaults={
 	factionrealm = {
 		sessionStubsChache={},
 	},
+	global = {
+		debugMode=false,
+	}
 }
 
 local options = { 
@@ -729,4 +732,15 @@ function VerisimilarPl:DecodeCoordinates(codeString)
 		y=((c3-11)*100 + (c3-11))/10000;
 	end
 	return x,y;
+end
+
+function VerisimilarPl:PrintDebug(...)
+	if(VerisimilarPl.db.global.debugMode)then
+		self:Print(...)
+	end
+end
+
+function VerisimilarPl:SetDebugMode(switch)
+	switch=switch and true or false;
+	VerisimilarPl.db.global.debugMode=switch;
 end

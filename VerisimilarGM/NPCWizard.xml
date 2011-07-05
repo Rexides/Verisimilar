@@ -691,7 +691,7 @@
 						</OnLoad>
 						<OnClick>
 							local iconButton=self;
-							VerisimilarGM:ShowIconChooser(function(icon)VerisimilarGM:Print(icon,self,iconButton);iconButton.icon=icon;SetItemButtonTexture(iconButton,"Interface\\Icons\\"..iconButton.icon); end)
+							VerisimilarGM:ShowIconChooser(function(icon)VerisimilarPl:PrintDebug(icon,self,iconButton);iconButton.icon=icon;SetItemButtonTexture(iconButton,"Interface\\Icons\\"..iconButton.icon); end)
 						</OnClick>
 					</Scripts>
 				</Button>

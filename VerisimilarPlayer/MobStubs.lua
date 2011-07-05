@@ -97,7 +97,7 @@ function VerisimilarPl:CLEAR_LOOT(stub,lootInfo)
 end
 
 function VerisimilarPl:RemoveDrop(mob,guid,item)
-	--self:Print("1",mob.id,guid,item).id)
+	--self:PrintDebug("1",mob.id,guid,item).id)
 	local session=mob.session;
 	
 	if(item==nil)then

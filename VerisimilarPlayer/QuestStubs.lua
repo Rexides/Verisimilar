@@ -313,10 +313,10 @@ end
 function VerisimilarPl:QUEST_AVAILABILITY(stub,available)
 	if(available)then
 		stub.available=true;
-		self:Print("Quest ",stub.title," available")
+		self:PrintDebug("Quest ",stub.title," available")
 	else
 		stub.available=false;
-		self:Print("Quest ",stub.title," not available")
+		self:PrintDebug("Quest ",stub.title," not available")
 	end
 	self:UpdateMinimapQuestIcons()
 end

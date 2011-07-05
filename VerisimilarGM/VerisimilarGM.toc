@@ -1,4 +1,4 @@
-## Interface: 40000
+## Interface: 40200
 ## Title: VerisimilarGM
 ## Author: Erethas (Moonglade EU)
 ## Version: 0.16
