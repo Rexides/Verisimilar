@@ -49,6 +49,9 @@ function VerisimilarGM:InitializeAreaPanel()
 							{type="Button", key="setSubzoneToPlayer",label="Set to my subzone",refFrame="PREVIOUS",refPoint="TOPRIGHT",x=10,y=0, clickFunc=SetSubzoneToPlayer ,tooltip="Set to your current subzone"},
 							{type="Area", key="regionPicker",x=0,y=-145,clickFunc=RegionClick,setFunc=function(areaControl,zone,level) VerisimilarGM:GetActiveElement():SetZone(zone,level) end, getFunc=function(areaControl) return VerisimilarGM:GetActiveElement():GetZone() end,},
 						},
+						{text="Scripts",showOnEnabled=false,showOnDisabled=true,
+							{type="LargeEditBox", key="enteringScript",label="Entering Script:",x=10,y=-15,width=650,height=340,setFunc=function(editBox,text)VerisimilarGM:GetActiveElement():SetAreaScript(text);end, getFunc=function() return VerisimilarGM:GetActiveElement():GetAreaScript(); end,},
+						}
 					};
 	
 	areaPanel=self:CreateElementPanel("Area",description)
@@ -88,19 +91,25 @@ local function RegionClicked(button,regionNum)
 	local area=VerisimilarGM:GetActiveElement();
 
 	controls.regionType:Hide();
-	--controls.objTarget:Hide();
-	--controls.objType:Hide();
-	--controls.objFilter:Hide();
-	--controls.smartObjFilter:Hide();
 	controls.regionPicker:Hide();
 	controls.region.selection=regionNum;
+	
+	controls.regionX:Hide();
+	controls.regionY:Hide();
+	controls.setCenterAsPlayer:Hide();
+	controls.regionWidth:Hide();
+	controls.increaseWidth:Hide();
+	controls.decreaseWidth:Hide();
+	controls.setWidthToPlayer:Hide();
+	controls.regionHeight:Hide();
+	controls.increaseHeight:Hide();
+	controls.decreaseHeight:Hide();
+	controls.setHeightToPlayer:Hide();
+	controls.subzone:Hide();
+	controls.setSubzoneToPlayer:Hide();
 
 	if(regionNum)then
 		controls.regionType:Show();
-		--controls.objTarget:Show();
-		--controls.objType:Show();
-		--controls.objFilter:Show();
-		--controls.smartObjFilter:Show();
 		controls.regionPicker:Show();
 	end
 	VerisimilarGM:UpdateInterface();

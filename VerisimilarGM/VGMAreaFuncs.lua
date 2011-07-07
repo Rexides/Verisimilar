@@ -167,22 +167,33 @@ function VerisimilarGM.AreaFuncs:SetSubzone(index,subzone)
 	end
 end
 
-function VerisimilarGM.SessionFuncs:GetAreaScript()
-	return self.newPlayerScriptText;
+function VerisimilarGM.AreaFuncs:GetAreaScript()
+	return self.areaScriptText;
 end
 
 
-function VerisimilarGM.SessionFuncs:SetAreaScript(scriptText)
+function VerisimilarGM.AreaFuncs:SetAreaScript(scriptText)
 	local func,message=loadstring("return "..scriptText);
 	assert(func~=nil,message);
 	self.areaScriptText=scriptText;
 	self.areaScript=func();
-	setfenv(self.newPlayerScript,self:GetSession().env);
+	setfenv(self.areaScript,self:GetSession().env);
 end
 
 function VerisimilarGM.AreaFuncs:PLAYER_CHANGES_AREA(player,entering)
 	player.elements[self.id].inside=entering;
 	self:areaScript(player,entering);
+	if(entering)then
+		for _,element in pairs(self:GetSession().elements)do
+			if(element:IsEnabled() and element.elType=="Quest" and element:IsStarter(self) and element:IsAvailableToPlayer(player) and player.elements[element.id].finished==false)then
+				element:Offer(player);
+			end
+		end
+	end
+end
+
+function VerisimilarGM.AreaFuncs:Event(player,event,parameter,arg1,arg2,arg3)
+
 end
 
 

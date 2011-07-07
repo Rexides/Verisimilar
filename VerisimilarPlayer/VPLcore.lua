@@ -474,8 +474,9 @@ for i=1,4 do
 end
 
 function VerisimilarPl:CombatLogEvent(...)
-	local timestamp, event, hideCaster, sourceGUID,	sourceName,	sourceFlags, destGUID, destName=select(2,...)
+	local timestamp, event, hideCaster, sourceGUID,	sourceName,	theFuckIsThis, sourceFlags, destGUID, destName=select(2,...)
 	if(event=="UNIT_DIED" and VerisimilarPl.aggroList[destGUID])then
+		self:PrintDebug(destName);
 		local guid=strsub(destGUID,13);
 		for _,session in pairs(VerisimilarPl.sessions)do
 			if(VerisimilarPl:CheckKillObjective(session,destName) or VerisimilarPl:CheckLootableMobKill(session,destName,guid))then
@@ -484,7 +485,7 @@ function VerisimilarPl:CombatLogEvent(...)
 			end
 		end
 	elseif(strfind(event,"_DAMAGE"))then
-		
+		self:PrintDebug("sourse name",sourceName,"dest name",destName,"dest guid", destGUID, "the fuck is this", theFuckIsThis);
 		local tag=false
 		local raidMembers=GetNumRaidMembers()
 		for i=1,raidMembers do
@@ -503,6 +504,7 @@ function VerisimilarPl:CombatLogEvent(...)
 			end
 		end
 		if(tag==true or sourceName==UnitName("player") or sourceName==UnitName("pet"))then
+			self:PrintDebug(destName,"tagged");
 			VerisimilarPl.aggroList[destGUID]=0;
 		end
 	end
