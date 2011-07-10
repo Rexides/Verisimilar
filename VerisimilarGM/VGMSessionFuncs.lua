@@ -71,6 +71,9 @@ function VerisimilarGM:UpdateSession(session)
 			
 		else
 			session.Mobs={};
+			if(not session.players)then
+				session.players={};
+			end
 			for playerName, player in pairs(session.players) do
 				player.items={};
 			end

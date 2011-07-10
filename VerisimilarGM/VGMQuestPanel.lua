@@ -182,7 +182,7 @@ function VerisimilarGM:InitializeQuestPanel()
 	poi:SetFrameLevel(questPanel.controls.poiPicker.Map:GetFrameLevel()+1);
 	poi.texture=poi:CreateTexture();
 	poi.texture:SetAllPoints(poi);
-	poi.texture:SetTexture("Interface\\AddOns\\VerisimilarPlayer\\Images\\Interface\\white_circle");
+	poi.texture:SetTexture("Interface\\WorldMap\\UI-QuestPoi-NumberIcons");
 	poi.texture:SetTexCoord(0.52,0.60,0.39,0.48);
 end
 
