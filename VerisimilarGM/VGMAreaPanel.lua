@@ -1,5 +1,5 @@
 local areaPanel,regionMarker
-local UpdateRegionMarker,SetRegionMarker,GetRegionMenu,AddRegion,RemoveRegion,RegionClick,GetRegionTypeMenu,SetRegionCoords,GetRegionX,GetRegionY,SetCenterAsPlayer,SetRegionWidth, GetRegionWidth, SetWidthToPlayer,SetRegionHeight,GetRegionHeight,SetHeightToPlayer,SetSubzone,GetSubzone,SetSubzoneToPlayer
+local UpdateRegionMarker,SetRegionMarker,GetRegionMenu,AddRegion,RemoveRegion,RegionClick,GetRegionTypeMenu,SetRegionCoords,GetRegionX,GetRegionY,SetCenterAsPlayer,SetRegionWidth, GetRegionWidth, SetWidthToPlayer,SetRegionHeight,GetRegionHeight,SetHeightToPlayer,SetSubzone,GetSubzone,SetSubzoneToPlayer,SetRegionThreshold, GetRegionThreshold,SetThresholdToPlayer
 function VerisimilarGM:InitializeAreaPanel()
 	
 	StaticPopupDialogs["VERISIMILAR_NEW_AREA"] = {
@@ -45,6 +45,10 @@ function VerisimilarGM:InitializeAreaPanel()
 							{type="Button", key="increaseHeight",label="+",refFrame="PREVIOUS",refPoint="TOPRIGHT",x=10,y=0, clickFunc=function() local area=VerisimilarGM:GetActiveElement();local distance=tonumber(areaPanel.controls.regionHeight:GetText())*1.1;area:SetHeight(areaPanel.controls.region.selection,distance);areaPanel.controls.regionHeight:SetText(distance);UpdateRegionMarker() end},
 							{type="Button", key="decreaseHeight",label="-",refFrame="PREVIOUS",refPoint="TOPRIGHT",x=5,y=0, clickFunc=function() local area=VerisimilarGM:GetActiveElement();local distance=tonumber(areaPanel.controls.regionHeight:GetText())*0.9;area:SetHeight(areaPanel.controls.region.selection,distance);areaPanel.controls.regionHeight:SetText(distance);UpdateRegionMarker() end},
 							{type="Button", key="setHeightToPlayer",label="Set to my position",refFrame="PREVIOUS",refPoint="TOPRIGHT",x=10,y=0, clickFunc=SetHeightToPlayer ,tooltip="Set the rectangle's height to your current position"},
+							{type="EditBox", key="regionThreshold",label="Threshold:",refFrame="setWidthToPlayer",refPoint="TOPRIGHT",x=80,y=0,width=150,setFunc=SetRegionThreshold, getFunc=GetRegionThreshold,tooltip="The additional distance the player has to cover before entering or leaving the area"},
+							{type="Button", key="increaseThreshold",label="+",refFrame="PREVIOUS",refPoint="TOPRIGHT",x=10,y=0, clickFunc=function() local area=VerisimilarGM:GetActiveElement();local threshold=tonumber(areaPanel.controls.regionThreshold:GetText())*1.1;area:SetThreshold(threshold);areaPanel.controls.regionThreshold:SetText(threshold);UpdateRegionMarker() end},
+							{type="Button", key="decreaseThreshold",label="-",refFrame="PREVIOUS",refPoint="TOPRIGHT",x=5,y=0, clickFunc=function() local area=VerisimilarGM:GetActiveElement();local threshold=tonumber(areaPanel.controls.regionThreshold:GetText())*0.9;area:SetThreshold(threshold);areaPanel.controls.regionThreshold:SetText(threshold);UpdateRegionMarker() end},
+							{type="Button", key="setThresholdToPlayer",label="Set to my position",refFrame="regionThreshold",refPoint="BOTTOMLEFT",x=0,y=-5, clickFunc=SetThresholdToPlayer ,tooltip="Set the threshold as the distance from the side closest to the player, up to his position"},
 							{type="EditBox", key="subzone",label="Subzone:",refFrame="regionType",refPoint="BOTTOMLEFT",x=0,y=-10,width=180,labelPosition="LEFT",setFunc=SetSubzone, getFunc=GetSubzone,tooltip="The subzone's name"},
 							{type="Button", key="setSubzoneToPlayer",label="Set to my subzone",refFrame="PREVIOUS",refPoint="TOPRIGHT",x=10,y=0, clickFunc=SetSubzoneToPlayer ,tooltip="Set to your current subzone"},
 							{type="Area", key="regionPicker",x=0,y=-145,clickFunc=RegionClick,setFunc=function(areaControl,zone,level) VerisimilarGM:GetActiveElement():SetZone(zone,level) end, getFunc=function(areaControl) return VerisimilarGM:GetActiveElement():GetZone() end,},
@@ -104,6 +108,10 @@ local function RegionClicked(button,regionNum)
 	controls.increaseHeight:Hide();
 	controls.decreaseHeight:Hide();
 	controls.setHeightToPlayer:Hide();
+	controls.regionThreshold:Hide();
+	controls.increaseThreshold:Hide();
+	controls.decreaseThreshold:Hide();
+	controls.setThresholdToPlayer:Hide();
 	controls.subzone:Hide();
 	controls.setSubzoneToPlayer:Hide();
 
@@ -157,6 +165,10 @@ local function RegionTypeClicked(button,typeNum)
 	controls.increaseHeight:Hide();
 	controls.decreaseHeight:Hide();
 	controls.setHeightToPlayer:Hide();
+	controls.regionThreshold:Hide();
+	controls.increaseThreshold:Hide();
+	controls.decreaseThreshold:Hide();
+	controls.setThresholdToPlayer:Hide();
 	controls.subzone:Hide();
 	controls.setSubzoneToPlayer:Hide();
 	controls.regionType.selection=typeNum;
@@ -171,6 +183,10 @@ local function RegionTypeClicked(button,typeNum)
 		controls.increaseWidth:Show();
 		controls.decreaseWidth:Show();
 		controls.setWidthToPlayer:Show();
+		controls.regionThreshold:Show();
+		controls.increaseThreshold:Show();
+		controls.decreaseThreshold:Show();
+		controls.setThresholdToPlayer:Show();
 		regionMarker.texture:SetTexture("Interface\\AddOns\\VerisimilarPlayer\\Images\\Interface\\white_circle");
 		UpdateRegionMarker();
 		regionMarker:Show()
@@ -186,6 +202,10 @@ local function RegionTypeClicked(button,typeNum)
 		controls.increaseHeight:Show();
 		controls.decreaseHeight:Show();
 		controls.setHeightToPlayer:Show();
+		controls.regionThreshold:Show();
+		controls.increaseThreshold:Show();
+		controls.decreaseThreshold:Show();
+		controls.setThresholdToPlayer:Show();
 		regionMarker.texture:SetTexture(1,1,1);
 		UpdateRegionMarker();
 		regionMarker:Show()
@@ -328,6 +348,46 @@ SetHeightToPlayer=function(button)
 	VerisimilarGM:GetActiveElement():SetZone(zoneId,level);
 	UpdateRegionMarker();
 	VerisimilarGM:UpdateInterface();
+end
+
+SetRegionThreshold=function(editBox,text)
+	local controls=areaPanel.controls;
+	local area=VerisimilarGM:GetActiveElement();
+	area:SetThreshold(controls.regionThreshold:GetText())
+end
+
+GetRegionThreshold=function(editBox)
+	local regionDD=areaPanel.controls.region;
+	local area=VerisimilarGM:GetActiveElement();
+	if(regionDD.selection)then
+		local x,y,width,height,threshold=area:GetAreaInfo(regionDD.selection)
+		return threshold;
+	end
+end
+
+SetThresholdToPlayer=function(button)
+	local regionDD=areaPanel.controls.region;
+	local area=VerisimilarGM:GetActiveElement();
+	local x,y=GetPlayerMapPosition("player");
+	local cx,cy,width,height,threshold=area:GetAreaInfo(regionDD.selection)
+	
+	local areaType=area:GetType(regionDD.selection);
+	local threshold;
+	if(areaType=="Circle")then
+		local dx=x-cx;
+		local dy=y-cy;
+		threshold=abs(sqrt(dx*dx+dy*dy)-width);
+	elseif(areaType=="Rectangle")then
+		local leftDist=abs(cx-width-x);
+		local rightDist=abs(cx+width-x);
+		local topDist=abs(cy+height-y);
+		local bottomDist=abs(cy-height-y);
+		local horizLess=leftDist<rightDist and leftDist or rightDist;
+		local vertLess=topDist<bottomDist and topDist or bottomDist;
+		threshold=horizLess<vertLess and horizLess or vertLess;
+	end
+	areaPanel.controls.regionThreshold:SetText(threshold);
+	VerisimilarGM:GetActiveElement():SetThreshold(threshold);
 end
 
 SetSubzone=function(editBox,text)

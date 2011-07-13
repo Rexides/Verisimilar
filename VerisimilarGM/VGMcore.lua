@@ -10,6 +10,8 @@ TODO:
 	-Right click menu on sessions/elements
 	-Areas
 		-Set threshold
+	-Coordinates:
+		-Truncate coordinates
 -On line help
 	-Documentation
 	-Tutorials

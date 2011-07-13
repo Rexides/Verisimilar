@@ -5,6 +5,7 @@ function VerisimilarGM:InitializeArea(Area)
 	Area.zone=GetCurrentMapAreaID();
 	Area.level=GetCurrentMapDungeonLevel();
 	Area.regions={};
+	Area.threshold=0.0001;
 	Area.areaScriptText="function(Area,player,entering)\n    if(entering)then\n\n    else\n\n    end\nend";
 end
 
@@ -50,6 +51,7 @@ function VerisimilarGM.AreaFuncs:GetStub(player)
 				z=self.zone,
 				l=self.level,
 				r={},
+				th=VerisimilarPl:EncodeCoordinates(self.threshold),
 				};
 	for i=1,#self.regions do
 		stub.r[i]={t=self.regions[i].type}
@@ -119,7 +121,7 @@ end
 
 function VerisimilarGM.AreaFuncs:GetAreaInfo(index)
 	if(self.regions[index])then
-		return self.regions[index].centerX,self.regions[index].centerY,self.regions[index].width,self.regions[index].height;
+		return self.regions[index].centerX,self.regions[index].centerY,self.regions[index].width,self.regions[index].height,self.threshold;
 	end
 end
 
@@ -149,6 +151,15 @@ function VerisimilarGM.AreaFuncs:SetHeight(index,height)
 	if(height and self.regions[index] and self.regions[index].height~=height)then
 		self:GenerateNewVersion();
 		self.regions[index].height=height;
+	end
+end
+
+function VerisimilarGM.AreaFuncs:SetThreshold(threshold)
+	if(self.enabled==true and self:GetSession():IsEnabled()==true)then return end
+	threshold=tonumber(threshold);
+	if(threshold and self.threshold~=threshold)then
+		self:GenerateNewVersion();
+		self.threshold=threshold;
 	end
 end
 
