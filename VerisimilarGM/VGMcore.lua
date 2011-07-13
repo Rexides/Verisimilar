@@ -5,22 +5,14 @@ local Tourist=LibStub("LibTourist-3.0");
 --[[
 TODO:
 -Welcome screen
--Wizards
--Optimize messages
-	-Transfer everything
-		-Get rid of getzonescale (all calculations are done with relative coordinates)
-		-Scripts
-		-Areas
-			-Create area window (yes, I have to)
-				-Map frame
-				-zone select dd
-				-type select dd, with add and remove buttons
-				-include/exclude radio buttons
-				-context edit boxes (circle, square, subzone), with -,+?
-				-colored textures/frames on map frame. Draggable/sizable if possible
-				-"My position" button
+-Wizards		
 -VGM Interface
-	-Mobs
+	-Right click menu on sessions/elements
+	-Areas
+		-Set threshold
+-On line help
+	-Documentation
+	-Tutorials
 -transfer sessions between players
 -Copy elements (between sessions)
 ]]

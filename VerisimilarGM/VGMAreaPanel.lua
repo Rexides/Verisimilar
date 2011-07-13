@@ -65,14 +65,6 @@ function VerisimilarGM:InitializeAreaPanel()
 	
 end
 
-local function SetRegionMarker(x,y)
-	local map=areaPanel.controls.regionPicker.Map;
-	local scale=map:GetEffectiveScale();
-	regionMarker:SetPoint("CENTER", map, "TOPLEFT",x*map:GetWidth()*scale,-y*map:GetHeight()*scale);
-	UpdateRegionMarker();
-	--regionMarker:Show();	
-end
-
 UpdateRegionMarker=function()
 	local controls=areaPanel.controls
 	local map=controls.regionPicker.Map;
@@ -82,8 +74,15 @@ UpdateRegionMarker=function()
 	local width=abs(tonumber(controls.regionWidth:GetText()) or 0);
 	local height=abs(controls.regionType.selection==4 and (tonumber(controls.regionHeight:GetText()) or 0) or width);
 	regionMarker.texture:SetSize(width*xScale,height*yScale);
-	regionMarker.texture:SetVertexColor(1,0.7,0.1,0.5)
-	
+	regionMarker.texture:SetVertexColor(1,0.7,0.1,0.5);
+end
+
+local function SetRegionMarker(x,y)
+	local map=areaPanel.controls.regionPicker.Map;
+	local scale=map:GetEffectiveScale();
+	regionMarker:SetPoint("CENTER", map, "TOPLEFT",x*map:GetWidth()*scale,-y*map:GetHeight()*scale);
+	UpdateRegionMarker();
+	--regionMarker:Show();	
 end
 
 local function RegionClicked(button,regionNum)
@@ -173,6 +172,7 @@ local function RegionTypeClicked(button,typeNum)
 		controls.decreaseWidth:Show();
 		controls.setWidthToPlayer:Show();
 		regionMarker.texture:SetTexture("Interface\\AddOns\\VerisimilarPlayer\\Images\\Interface\\white_circle");
+		UpdateRegionMarker();
 		regionMarker:Show()
 	elseif(typeNum==4)then
 		controls.regionX:Show();
@@ -187,6 +187,7 @@ local function RegionTypeClicked(button,typeNum)
 		controls.decreaseHeight:Show();
 		controls.setHeightToPlayer:Show();
 		regionMarker.texture:SetTexture(1,1,1);
+		UpdateRegionMarker();
 		regionMarker:Show()
 	elseif(typeNum==2)then
 		controls.subzone:Show();
