@@ -8,10 +8,10 @@ TODO:
 -Wizards		
 -VGM Interface
 	-Right click menu on sessions/elements
-	-Areas
-		-Set threshold
 	-Coordinates:
 		-Truncate coordinates
+	-Quests
+		-Subzone objective -> Area objective
 -On line help
 	-Documentation
 	-Tutorials

@@ -4,6 +4,7 @@ function VerisimilarPl:AddAreaStubData(stubData,stubInfo)
 	stubData.name=stubInfo.n;
 	stubData.zone=stubInfo.z;
 	stubData.level=stubInfo.l;
+	stubData.threshold=self:DecodeCoordinates(stubInfo.th);
 	stubData.regions={};
 	for i=1,#stubInfo.r do
 		local x,y=self:DecodeCoordinates(stubInfo.r[i].c);
@@ -21,16 +22,16 @@ function VerisimilarPl:DisableAreaStub(stub)
 
 end
 
-local function checkCircle(region,x,y)
+local function checkCircle(region,x,y,threshold)
 	local dx=region.x-x;
 	local dy=region.y-y;
-	return dx*dx+dy*dy<region.width*region.width;
+	return dx*dx+dy*dy<(region.width+threshold)*(region.width+threshold);
 end
 
-local function checkRect(region,x,y)
+local function checkRect(region,x,y,threshold)
 	local dx=abs(region.x-x);
 	local dy=abs(region.y-y);
-	return dx<region.width and dy<region.height
+	return dx<region.width+threshold and dy<region.height+threshold
 end
 
 function VerisimilarPl:CheckArea(stub)
@@ -39,10 +40,11 @@ function VerisimilarPl:CheckArea(stub)
 	local zone=self.currentZone;
 	local level=self.currentLevel;
 	local subzone=GetSubZoneText();
+	local threshold=stub.inside and stub.threshold or -stub.threshold;
 	local inside=false;
 	if(zone==stub.zone and level==stub.level)then
 		for i=1,#stub.regions do
-			inside=(stub.regions[i].type==1 and true) or (stub.regions[i].type==2 and stub.regions[i].subzone==subzone) or (stub.regions[i].type==3 and checkCircle(stub.regions[i],x,y)) or (stub.regions[i].type==4 and checkRect(stub.regions[i],x,y)) or false;
+			inside=(stub.regions[i].type==1 and true) or (stub.regions[i].type==2 and stub.regions[i].subzone==subzone) or (stub.regions[i].type==3 and checkCircle(stub.regions[i],x,y,threshold)) or (stub.regions[i].type==4 and checkRect(stub.regions[i],x,y,threshold)) or false;
 			if(inside)then break; end
 		end
 	end
