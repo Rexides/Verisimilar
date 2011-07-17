@@ -164,7 +164,7 @@ function VerisimilarGM.QuestFuncs:GetStub()
 						ot=self:GetObjectiveText(i);
 						tv=self:GetObjectiveTargetValue(i);
 						};
-			if(self.objectives[i].event~="Script")then
+			if(self.objectives[i].event~="Script" or self.objectives[i].event~="Area")then
 				for j=1,#VerisimilarPl.eventList do
 					if(self.objectives[i].event==VerisimilarPl.eventList[j])then
 						stub.o[i].e=j;
@@ -890,7 +890,7 @@ function VerisimilarGM.QuestFuncs:TURN_IN_QUEST(player,choice)
 		end
 		for i=1,#self.objectives do
 			local item=self:GetSession().elements[self.objectives[i].filter[1]];
-			if(item)then
+			if(item and item.elType=="Item")then
 				item:GiveTo(player,-self.objectives[i].targetValue);
 			end
 			questVariables.objectives[i].currentValue=0;

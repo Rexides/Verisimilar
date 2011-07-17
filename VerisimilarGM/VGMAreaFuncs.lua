@@ -200,6 +200,7 @@ function VerisimilarGM.AreaFuncs:PLAYER_CHANGES_AREA(player,entering)
 				element:Offer(player);
 			end
 		end
+		self:GetSession():Event(player,"Area",self.id);
 	end
 end
 

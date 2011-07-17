@@ -1,6 +1,6 @@
 VerisimilarPl.regionTypes={"Entire zone","Subzone","Circle","Rectangle"}
 
-VerisimilarPl.eventList={"Kill","Subzone","Item","Script"};
+VerisimilarPl.eventList={"Kill","Area","Item","Script"};
 VerisimilarPl.itemQuality={"Poor","Common","Uncommon","Rare","Epic","Legendary","Artifact"}
 VerisimilarPl.qualityColor={Poor={r=0.6,g=0.6,b=0.6}, Common={r=1,g=1,b=1}, Uncommon={r=0.1,g=1,b=0}, Rare={r=0,g=0.4,b=0.86}, Epic={r=0.63,g=0.21,b=0.93}, Legendary={r=1,g=0.5,b=0}, Artifact={r=0.9,g=0.8,b=0.5}}
 VerisimilarPl.documentMaterials={"Parchment","Bronze","Marble","Silver","Stone","Valentine"}

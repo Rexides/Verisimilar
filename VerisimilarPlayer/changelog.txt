@@ -56,6 +56,8 @@ v0.16
 
 -(VGM) Emote distance has been removed. NPCs now use say distance for emotes as well.
 
+-(VGM) The "Subsoze" quest objective types have been changed to use the new Area elements, allowing for better customization.
+
 
 v0.15
 

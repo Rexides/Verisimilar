@@ -436,7 +436,6 @@ function VerisimilarPl:ZONE_CHANGED_NEW_AREA()
 		end
 		VerisimilarPl:UpdateStubsNewZone(VerisimilarPl.currentZone);
 	end
-	VerisimilarPl:SubzoneChangedEvent();
 end
 
 
@@ -541,15 +540,6 @@ function VerisimilarPl:InventoryUpdateEvent(...)
 				self:SendSessionMessage(session,nil,"EVENT_GAINED_ITEM",{n=itemName,a=GetItemCount(itemName, true)+amount});
 				
 			end
-		end
-	end
-end
-
-function VerisimilarPl:SubzoneChangedEvent(...)
-	local subzone=GetMinimapZoneText();
-	for _,session in pairs(VerisimilarPl.sessions)do
-		if(VerisimilarPl:CheckSubzoneObjective(session,subzone))then
-			self:SendSessionMessage(session,nil,"EVENT_SUBZONE",subzone);
 		end
 	end
 end

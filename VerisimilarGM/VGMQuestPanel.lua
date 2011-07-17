@@ -580,10 +580,10 @@ GetObjTarget=function(editBox)
 	end
 end
 
-local labels={Kill="Mob name:",Item="Item ID:",Script="Event string:"}
-local tooltips={Kill="Enter the name of the mob the player must kill to complete this objective.",Item="Select the item the player needs to find to complete this objective",Script="Enter a unique string for this objective"}
-local buttonLabels={Kill="Set as my target",Item="Select from a list",Script="Generate unique string"}
-local buttonTooltips={Kill="Target a mob, and then click this button to set it as the quest objective",Item="Select an item from the drop down list that will be this quest objective",Script="Generate a unique string to be used as an event within scripts for this objective"}
+local labels={Kill="Mob name:",Item="Item ID:",Area="Area ID:",Script="Event string:"}
+local tooltips={Kill="Enter the name of the mob the player must kill to complete this objective.",Item="Select the item the player needs to find to complete this objective",Area="Select the area the player needs to enter to complete this objective",Script="Enter a unique string for this objective"}
+local buttonLabels={Kill="Set as my target",Item="Select from a list",Area="Select from a list",Script="Generate unique string"}
+local buttonTooltips={Kill="Target a mob, and then click this button to set it as the quest objective",Item="Select an item from the drop down list that will be this quest objective",Area="Select an area from the drop down list that will be this quest objective",Script="Generate a unique string to be used as an event within scripts for this objective"}
 local function ObjTypeClicked(button,objType)
 	local controls=questPanel.controls;
 	local quest=VerisimilarGM:GetActiveElement();
@@ -653,6 +653,16 @@ setSmartObjFilter=function(button)
 		for id, element in pairs(session.elements)do
 			if(element.elType=="Item")then
 				tinsert(menu,{text=id.." - "..element:GetName(),func=ObjItemClicked,arg1=id});
+			end
+		end
+		EasyMenu(menu, dummyDD, button, 0, 0, nil, 10);
+	elseif(objType=="Area")then
+		local session=quest:GetSession();
+		local menu={};
+				
+		for id, element in pairs(session.elements)do
+			if(element.elType=="Area")then
+				tinsert(menu,{text=id,func=ObjItemClicked,arg1=id});
 			end
 		end
 		EasyMenu(menu, dummyDD, button, 0, 0, nil, 10);

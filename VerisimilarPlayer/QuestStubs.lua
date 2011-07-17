@@ -535,28 +535,6 @@ function VerisimilarPl:CheckItemObjective(session,itemName)
 end
 
 
-
-function VerisimilarPl:CheckSubzoneObjective(session,subzone)
-
-			for _,stub in pairs(session.stubs)do
-				if(stub.type=="Quest" and stub.enabled and stub.onQuest)then
-
-					for j=1,#stub.objectivesInfo do
-						local objective=stub.objectivesInfo[j]
-						if(objective.event=="Subzone")then
-							for i=1,#objective.filter do
-								if(objective.filter[i]~="" and strfind(strlower(subzone),strlower(objective.filter[i])))then
-									return true;
-								end
-							end
-						end
-					end
-				end	
-			end
-
-end
-
-
 function VerisimilarPl:OFFER_QUEST(stub,offerType) --offerType: 1 - Element was enabled notification, just add to questlog, 2 - quest was just accepted, play sound and display message, 3 - Auto quest, also show pop-up
 	
 	stub.onQuest=true;

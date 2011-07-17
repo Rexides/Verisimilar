@@ -191,7 +191,7 @@ function VerisimilarGM:UpdateSession(session)
 	if(session.version<3)then
 		session.elType="Session";
 		session.channel="WHISPER";
-		VerisimilarGM:GenerateSessionNetID(session)
+		VerisimilarGM:GenerateSessionNetID(session);
 		session.elements={};
 		session.scripts={};
 		for __,item in pairs(session.Items)do
@@ -220,10 +220,14 @@ function VerisimilarGM:UpdateSession(session)
 			quest.abandonScriptText=quest.abaddonScriptText; --Supid typo
 			quest.abaddonScriptText=nil;
 			
-			quest.detailsScriptText=""; --Begone, foul knave!
+			quest.detailsScriptText=nil; --Begone, foul knave!
 			for i=1,#quest.objectives do
 				quest.objectives[i].level=0;
 				quest.objectives[i].zone=0;
+				if(quest.objectives[i].event=="Subzone")then
+					quest.objectives[i].event="Area";
+					quest.objectives[i].filter[1]="";
+				end
 			end
 			quest.starters={};
 			if(quest.starterId)then
