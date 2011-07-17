@@ -15,13 +15,7 @@
 			OptionsListButton_OnLoad(self, function() VerisimilarGM:ToggleElementListEntry(self.element); end);
 		</OnLoad>
 		<OnClick>
-			PlaySound("igMainMenuOptionCheckBoxOn");
-			local parent=self:GetParent();
-			
-			OptionsList_ClearSelection(parent, parent.buttons);
-			OptionsList_SelectButton(parent, self);
-			--VerisimilarGM:UpdateInterface();
-			VerisimilarGM:SetPanelToElement(self.element.element)
+			VerisimilarGM:ElementClicked(self,button);
 		</OnClick>
 			
 		<OnEnter>

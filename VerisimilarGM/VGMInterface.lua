@@ -246,14 +246,6 @@ function VerisimilarGM:ProccessCommand(commandText)
 	end
 end
 
-function VerisimilarGM:SessionClicked(session,button)
-	if(button == "LeftButton")then
-		self.activeElement=session;
-	elseif(button == "RightButton")then
-	
-	end
-end
-
 function VerisimilarGM.CountPlayers(session)
 	local plcount=0;
 	for _,player in pairs(session.players)do
@@ -264,11 +256,36 @@ function VerisimilarGM.CountPlayers(session)
 	return plcount;
 end
 
-function VerisimilarGM:ElementClicked(element,button)
-	if(button == "LeftButton")then
-		self.activeElement=element;
-	else
+local rightClickMenu={	{text="Enabled",func=function(button,element)
+												if(element:IsEnabled()) then
+													element:Disable();
+												else 
+													element:Enable() 
+												end 
+												VerisimilarGM:UpdateElementList();
+												if(element==VerisimilarGM:GetActiveElement())then
+													VerisimilarGM:SetPanelToElement(element);
+												end
+											end},
+						{text="Delete",notCheckable=true,func=	function(button,element)
+																	VerisimilarGM:DeleteElementPrompt(element); 
+																end};
+					};
+function VerisimilarGM:ElementClicked(elementButton,mouseButton)
+	local element=elementButton.element.element;
+	if(mouseButton=="LeftButton")then
+		PlaySound("igMainMenuOptionCheckBoxOn");
+		local parent=elementButton:GetParent();
 		
+		OptionsList_ClearSelection(parent, parent.buttons);
+		OptionsList_SelectButton(parent, elementButton);
+		VerisimilarGM:SetPanelToElement(element)
+	elseif(mouseButton=="RightButton")then
+		local x, y = GetCursorPosition();
+		rightClickMenu[1].checked=element:IsEnabled();
+		rightClickMenu[1].arg1=element;
+		rightClickMenu[2].arg1=element;
+		EasyMenu(rightClickMenu, menuFrame, UIParent , x , y,nil,10);
 	end
 end
 
@@ -442,18 +459,7 @@ end
 
 local mbEditTable={
 					{text="Delete",notCheckable=true,func=	function()
-																local activeElement=VerisimilarGM:GetActiveElement();
-																if(activeElement.elType=="Session")then
-																	local dialog = StaticPopup_Show("VERISIMILAR_DELETE_SESSION",activeElement.name)
-																	if (dialog) then
-																		dialog.data  = activeElement;
-																	end;
-																else
-																	local dialog = StaticPopup_Show("VERISIMILAR_DELETE_ELEMENT",activeElement.id)
-																	if (dialog) then
-																		dialog.data  = activeElement;
-																	end;
-																end
+																VerisimilarGM:DeleteElementPrompt(VerisimilarGM:GetActiveElement());
 															end,},
 				}
 function VerisimilarGM:MenuButtonEdit(button)
@@ -479,6 +485,20 @@ end
 function VerisimilarGM:GetActiveElement()
 	if(VGMMainFrame.controlPanel.element)then
 		return VGMMainFrame.controlPanel.element;
+	end
+end
+
+function VerisimilarGM:DeleteElementPrompt(element)
+	if(element.elType=="Session")then
+		local dialog = StaticPopup_Show("VERISIMILAR_DELETE_SESSION",element.name)
+		if (dialog) then
+			dialog.data  = element;
+		end;
+	else
+		local dialog = StaticPopup_Show("VERISIMILAR_DELETE_ELEMENT",element.id)
+		if (dialog) then
+			dialog.data  = element;
+		end;
 	end
 end
 
