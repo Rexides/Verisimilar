@@ -91,6 +91,16 @@ controlConstructors.EditBox=function(page,description)
 	control.setFunc=description.setFunc;
 	control.getFunc=description.getFunc;
 	control:SetNumeric(description.numeric);
+	if(description.coordinates)then
+		control.oldGetText=control.GetText;
+		control.oldSetText=control.SetText;
+		control.GetText=function(editBox)
+							return (tonumber(editBox:oldGetText()) or 0)/100;
+						end;
+		control.SetText=function(editBox,text)
+							editBox:oldSetText(floor((tonumber(text) or 0)*100000)/1000);
+						end
+	end
 	if(description.labelPosition=="LEFT")then
 		control.label:ClearAllPoints();
 		control.label:SetPoint("RIGHT",control,"LEFT",-10,0);

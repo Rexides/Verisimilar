@@ -8,10 +8,8 @@ TODO:
 -Wizards		
 -VGM Interface
 	-Right click menu on sessions/elements
-	-Coordinates:
-		-Truncate coordinates
-	-Quests
-		-Subzone objective -> Area objective
+	-Mobs:
+		-Kill script
 -On line help
 	-Documentation
 	-Tutorials
