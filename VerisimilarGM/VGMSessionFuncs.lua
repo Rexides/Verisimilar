@@ -866,7 +866,7 @@ function VerisimilarGM.SessionFuncs:TransferStubs()
 				pendingPlayer=player;
 				nPendingTransfers=nPendingTransfers+1;
 				for id, elementData in pairs(player.elements)do
-					local element=self.element[id];
+					local element=self.elements[id];
 					if(element and element.version~=elementData.version)then
 						local insert=true;
 						for i=1,#stubList do --This is correct, we need to check this list too
