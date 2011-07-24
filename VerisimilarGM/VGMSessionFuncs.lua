@@ -574,6 +574,32 @@ function VerisimilarGM.SessionFuncs:NewArea(AreaId)
 	return Area;
 end
 
+function VerisimilarGM.SessionFuncs:AddElement(element)
+	if(VerisimilarGM:EnforceIDNamingRules(element.id)==false)then return end
+	if(self.elements[element.id])then
+		VerisimilarGM:Print("An element with that Id already exists");
+		return
+	end
+	element.sessionName=self.name
+	element.enabled=false;
+	if(element.elType=="NPC")then VerisimilarGM:AssignNPCFuncs(element);
+	elseif(element.elType=="Quest")then VerisimilarGM:AssignQuestFuncs(element);
+	elseif(element.elType=="Item")then VerisimilarGM:AssignItemFuncs(element);
+	elseif(element.elType=="Mob")then VerisimilarGM:AssignMobFuncs(element);
+	elseif(element.elType=="Area")then VerisimilarGM:AssignAreaFuncs(element);
+	end
+	
+	for _,player in pairs(self.players)do
+		element:InitializePlayer(player);
+	end
+	element:GenerateNewVersion();
+	VerisimilarGM:GenerateElementNetID(element,self);
+	self.env[element.id]=element;
+	self.elements[element.id]=element;
+	VerisimilarGM:LogEvent(element.elType.." "..element.id.." added to "..self.name)
+	return element;
+end
+
 function VerisimilarGM.SessionFuncs:GetElementFromNetID(netID)
 	for __,element in pairs(self.elements)do
 		if(element.netID==netID)then

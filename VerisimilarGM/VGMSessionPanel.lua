@@ -52,6 +52,28 @@ function VerisimilarGM:InitializeSessionPanel()
 		hideOnEscape = true,
 	}
 	
+	StaticPopupDialogs["VERISIMILAR_PASTE_ELEMENT"] = {
+		text = "Enter the new ID. The \"ID\" is just a codeword used to refer to this element within Verisimilar GM, not the item name visible to the players, which you will add later. 30 characters max, no space or special characters",
+		button1 = "Paste",
+		button2 = "Cancel",
+		hasEditBox = true,
+		OnAccept = function(self,data,data2)
+			local newElement=VerisimilarGM:RecursiveCopy(data2);
+			newElement.id=self.editBox:GetText();
+			if(data:AddElement(newElement))then
+				VerisimilarGM:AddElementToElementList(newElement);
+				VerisimilarGM:UpdateElementList();
+				VerisimilarGM:SetPanelToElement(newElement);
+			end
+		end,
+		OnHide = function(self)
+					self.editBox:SetText("")
+				end,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+	}
+	
 	StaticPopupDialogs["VERISIMILAR_KICK_PLAYER"] = {
 		text = "Kick selected player(s)",
 		button1 = "Yes",

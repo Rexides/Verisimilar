@@ -96,7 +96,9 @@ GetLootTable=function(list)
 	
 	for i=1,mob:GetNumDrops() do
 		local drop=mob:GetItem(i);
-		list:Insert(i,drop:IsEnabled());
+		if(drop)then
+			list:Insert(i,drop:IsEnabled());
+		end
 	end
 end
 
@@ -118,7 +120,10 @@ AddLoot=function(button)
 	local menu={};
 	local existingLoot={};
 	for i=1,mob:GetNumDrops() do
-		existingLoot[mob:GetItem(i).id]=true;
+		local drop=mob:GetItem(i);
+		if(drop)then
+			existingLoot[mob:GetItem(i).id]=true;
+		end
 	end
 	for _,element in pairs(session.elements)do
 		if(element.elType=="Item" and not existingLoot[element.id])then

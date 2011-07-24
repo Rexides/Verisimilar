@@ -7,14 +7,13 @@ TODO:
 -Welcome screen
 -Wizards		
 -VGM Interface
-	-Right click menu on sessions/elements
 	-Mobs:
 		-Kill script
 -On line help
 	-Documentation
 	-Tutorials
 -transfer sessions between players
--Copy elements (between sessions)
+
 ]]
 local defaults={
 	char = {

@@ -267,10 +267,14 @@ local rightClickMenu={	{text="Enabled",func=function(button,element)
 													VerisimilarGM:SetPanelToElement(element);
 												end
 											end},
+						{text="Copy",notCheckable=true,func=	function(button,element)
+																	VerisimilarGM.copiedElement=VerisimilarGM:RecursiveCopy(element);
+																end},
 						{text="Delete",notCheckable=true,func=	function(button,element)
 																	VerisimilarGM:DeleteElementPrompt(element); 
-																end};
+																end},
 					};
+					
 function VerisimilarGM:ElementClicked(elementButton,mouseButton)
 	local element=elementButton.element.element;
 	if(mouseButton=="LeftButton")then
@@ -285,6 +289,7 @@ function VerisimilarGM:ElementClicked(elementButton,mouseButton)
 		rightClickMenu[1].checked=element:IsEnabled();
 		rightClickMenu[1].arg1=element;
 		rightClickMenu[2].arg1=element;
+		rightClickMenu[3].arg1=element;
 		EasyMenu(rightClickMenu, menuFrame, UIParent , x , y,nil,10);
 	end
 end
@@ -305,6 +310,19 @@ function VerisimilarGM:FilterElement(element,filter)
 		return true;
 	end
 	return false;
+end
+
+function VerisimilarGM:RecursiveCopy(t)
+	local newT={};
+	for key,value in pairs(t)do
+		if(type(value)=="table")then
+			newT[key]=self:RecursiveCopy(value);
+		elseif(type(value)~="function")then
+			newT[key]=value;
+		end
+	end
+	
+	return newT;
 end
 
 function VerisimilarGM:ShowElementTooltip(button,element)
@@ -458,15 +476,33 @@ function VerisimilarGM:MenuButtonNew(button)
 end
 
 local mbEditTable={
+					{text="Copy",notCheckable=true,func=	function()
+																VerisimilarGM.copiedElement=VerisimilarGM:RecursiveCopy(VerisimilarGM:GetActiveElement());
+															end,},
+					{text="Paste",notCheckable=true,func=	function()
+																VerisimilarGM:PasteElementPrompt(VerisimilarGM.copiedElement);
+															end,},
 					{text="Delete",notCheckable=true,func=	function()
 																VerisimilarGM:DeleteElementPrompt(VerisimilarGM:GetActiveElement());
 															end,},
 				}
 function VerisimilarGM:MenuButtonEdit(button)
 	if(self:GetActiveElement())then
-		mbEditTable[1].disabled=false;
+		if(self.GetActiveElement().elType=="Session")then
+			mbEditTable[1].disabled=true;
+		else
+			mbEditTable[1].disabled=false;
+		end
+		if(self.copiedElement==nil)then
+			mbEditTable[2].disabled=true;
+		else
+			mbEditTable[2].disabled=false;
+		end
+		mbEditTable[3].disabled=false;
 	else
 		mbEditTable[1].disabled=true;
+		mbEditTable[2].disabled=true;
+		mbEditTable[3].disabled=true;
 	end
 	EasyMenu(mbEditTable, menuFrame, button, 0 , 0,nil,10);
 end
@@ -499,6 +535,26 @@ function VerisimilarGM:DeleteElementPrompt(element)
 		if (dialog) then
 			dialog.data  = element;
 		end;
+	end
+end
+
+function VerisimilarGM:PasteElementPrompt(element)
+	if(element.elType=="Session")then
+		return;
+	else
+		local dialog=StaticPopup_Show ("VERISIMILAR_PASTE_ELEMENT");
+		if (dialog) then
+			dialog.data=VerisimilarGM:GetActiveSession();
+			dialog.data2=element;
+			local newID=element.id;
+			local id=newID.."2";
+			local i=2;
+			while(VerisimilarGM:GetActiveSession().elements[id])do
+				i=i+1;
+				id=newID..i;
+			end
+			dialog.editBox:SetText(id);
+		end
 	end
 end
 

@@ -255,7 +255,7 @@ function VerisimilarGM:GenerateElementNetID(element,session)
 	local id
 	repeat
 		id=strchar(random(255));
-	until(ElementsPerSessionPerNetID[session.netID][element.netID]==nil)
+	until(ElementsPerSessionPerNetID[session.netID][id]==nil)
 	element.netID=id;
 	VerisimilarGM:RegisterElementNetID(element,session)
 end
