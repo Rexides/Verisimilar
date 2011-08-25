@@ -15,10 +15,12 @@ embeds.xml
 VPLMainFrame.xml
 MinimapButton.xml
 VPLItemTextFrame.xml
+HelpWindow.xml
 VPLcore.lua
 CommonData.lua
 VPLInterface.lua
 VPLCommunication.lua
+HelpWindow.lua
 NPCStubs.lua
 QuestStubs.lua
 ItemStubs.lua
