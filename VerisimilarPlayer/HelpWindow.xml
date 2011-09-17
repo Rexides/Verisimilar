@@ -7,7 +7,7 @@
 			OptionsListButton_OnLoad(self, function() VerisimilarPl:ToggleTopicListEntry(self.entry); end);
 		</OnLoad>
 		<OnClick>
-			VerisimilarGM:TopicClicked(self,button);
+			VerisimilarPl:TopicClicked(self,button);
 		</OnClick>
 	</Scripts>
 </Button>
@@ -103,15 +103,18 @@
 			</Scripts>	
 		</Button>
 		<Frame name="$parentTextPanel" parentKey="textPanel">
+			<Size>
+				<AbsDimension y="520" />
+			</Size>
 			<Anchors>
 				<Anchor point="TOPLEFT" relativeTo="$parentTopicList" relativePoint="TOPRIGHT">
 					<Offset>
-						<AbsDimension x="10" y="0"/>
+						<AbsDimension x="5" y="0"/>
 					</Offset>
 				</Anchor>
-				<Anchor point="BOTTOMRIGHT" relativeTo="$parentInsetBg" relativePoint="BOTTOMRIGHT">
+				<Anchor point="TOPRIGHT" relativeTo="$parentInsetBg" relativePoint="TOPRIGHT">
 					<Offset>
-						<AbsDimension x="-5" y="5"/>
+						<AbsDimension x="-5" y="-5"/>
 					</Offset>
 				</Anchor>
 			</Anchors>
@@ -153,6 +156,40 @@
 				</OnLoad>
 			</Scripts>
 		</Frame>
+		<Button name="$parentPreviousButton" inherits="UIPanelButtonTemplate" text="Previous topic" >
+			<Size>
+				<AbsDimension x="160" y="22"/>
+			</Size>
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="$parentTextPanel" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+				</Anchor>
+			</Anchors>
+			<Scripts>
+				<OnClick> 
+					--InterfaceOptionsFrame_OpenToCategory(VerisimilarPl.optionsFrame)
+				</OnClick>
+			</Scripts>
+		</Button>
+		<Button name="$parentNextButton" inherits="UIPanelButtonTemplate" text="Next topic" >
+			<Size>
+				<AbsDimension x="160" y="22"/>
+			</Size>
+			<Anchors>
+				<Anchor point="TOPRIGHT" relativeTo="$parentTextPanel" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+				</Anchor>
+			</Anchors>
+			<Scripts>
+				<OnClick> 
+					--InterfaceOptionsFrame_OpenToCategory(VerisimilarPl.optionsFrame)
+				</OnClick>
+			</Scripts>
+		</Button>
 	</Frames>
 	<Scripts>
 		<OnMouseDown> self:StartMoving();  </OnMouseDown>

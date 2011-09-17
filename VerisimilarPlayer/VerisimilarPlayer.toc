@@ -31,5 +31,6 @@ VPLEnvironmentPanel.lua
 VPLQuestPanel.lua
 VPLInventoryPanel.lua
 VPLMinimapMagic.lua
+PlayerDocumentation.lua
 
 

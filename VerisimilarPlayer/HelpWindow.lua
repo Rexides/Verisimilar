@@ -1,27 +1,12 @@
-VerisimilarPl.helpTopics={
-							{
-								title = "Introduction",
-								text = "Welcome to Verisimilar, blah blah",
-								{
-									title = "A topic",
-									text = "dsfasdfasfasf",
-								},
-								{
-									title = "Another topic",
-									text = "fggggegr",
-								},
-							},
-						};
-
 local helpTopics;
 
 function helptest()
-	VerisimilarPl:ShowHelpWindow(VerisimilarPl.helpTopics,"Verisimilar Player Help Topics");
+	VerisimilarPl:ShowHelpWindow(VerisimilarPl.helpTopics);
 end
 
-function VerisimilarPl:ShowHelpWindow(topics,title)
+function VerisimilarPl:ShowHelpWindow(topics)
 	helpTopics = topics;
-	VHelpFrameTitleText:SetText(title);
+	VHelpFrameTitleText:SetText(topics.title);
 	VerisimilarPl:UpdateTopicList();
 	VHelpFrame:Show();
 end
@@ -37,6 +22,7 @@ function VerisimilarPl:UpdateTopicList()
 			numEntries=numEntries+#helpTopics[i];
 		end
 	end
+
 	local numButtons = #buttons;
 
 	FauxScrollFrame_Update(VHelpFrame.topicList.list, numEntries, numButtons, buttons[1]:GetHeight());
@@ -126,4 +112,8 @@ end
 
 function VerisimilarPl:TopicFilterTextChanged(editbox)
 
+end
+
+function VerisimilarPl:TopicClicked(panelButton,mouseButton)
+	VHelpFrame.textPanel.text:SetText(panelButton.entry.text)
 end

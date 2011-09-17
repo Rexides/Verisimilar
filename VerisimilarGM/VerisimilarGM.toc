@@ -47,6 +47,7 @@ NPCChatWindow.lua
 IconChooser.lua
 Icons.lua
 DemoSession.lua
+GMDocumentation.lua
 
 
 
