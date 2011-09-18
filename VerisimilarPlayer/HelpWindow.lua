@@ -6,7 +6,7 @@ end
 
 function VerisimilarPl:ShowHelpWindow(topics)
 	helpTopics = topics;
-	if(helpTopics.selection == 1)then
+	if(helpTopics.selection == nil)then
 		helpTopics.selection = helpTopics[1];
 	end
 	VHelpFrame.textPanel.scroll.text:SetText(helpTopics.selection.text);

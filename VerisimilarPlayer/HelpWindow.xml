@@ -12,7 +12,7 @@
 	</Scripts>
 </Button>
 
-<Frame name="VHelpFrame" hidden="true" toplevel="false" frameStrata="MEDIUM" inherits="BasicFrameTemplateWithInset" movable="true" parent="UIParent">
+<Frame name="VHelpFrame" hidden="true" toplevel="true" frameStrata="MEDIUM" inherits="BasicFrameTemplateWithInset" movable="true" parent="UIParent">
 	<Size>
 		<AbsDimension x="600" y="600"/>
 	</Size>

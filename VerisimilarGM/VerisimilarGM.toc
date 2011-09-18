@@ -48,6 +48,7 @@ IconChooser.lua
 Icons.lua
 DemoSession.lua
 GMDocumentation.lua
+ScriptDocumentation.lua
 
 
 

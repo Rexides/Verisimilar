@@ -16,6 +16,14 @@ function VerisimilarGM:InitializeInterface()
 							},
 						[3]={
 								text="Help",
+								clickHandler={
+												{text="GM Guide",notCheckable=true,func=	function()
+																							VerisimilarPl:ShowHelpWindow(VerisimilarGM.helpTopics);
+																						end,},
+												{text="Script Guide",notCheckable=true,func=	function()
+																							VerisimilarPl:ShowHelpWindow(VerisimilarGM.scriptTopics);
+																						end,},
+											},
 							},
 						});
 
@@ -506,6 +514,8 @@ function VerisimilarGM:MenuButtonEdit(button)
 	end
 	EasyMenu(mbEditTable, menuFrame, button, 0 , 0,nil,10);
 end
+
+
 
 function VerisimilarGM:GetActiveSession()
 	if(VGMMainFrame.controlPanel.element)then

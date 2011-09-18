@@ -89,13 +89,30 @@
 			<Anchors>
 				<Anchor point="TOP" relativeTo="$parent" relativePoint="TOP">
 						<Offset>
-							<AbsDimension x="0" y="-30"/>
+							<AbsDimension x="0" y="-35"/>
 						</Offset>
 				</Anchor>
 			</Anchors>
 			<Scripts>
 			<OnClick> 
 				InterfaceOptionsFrame_OpenToCategory(VerisimilarPl.optionsFrame)
+			</OnClick>
+			</Scripts>
+		</Button>
+		<Button name="$parentHelpButton" inherits="UIPanelButtonTemplate" text="Help" >
+			<Size>
+				<AbsDimension x="110" y="22"/>
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT" relativeTo="$parentOptionsButton" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="10" y="0"/>
+						</Offset>
+				</Anchor>
+			</Anchors>
+			<Scripts>
+			<OnClick> 
+				VerisimilarPl:ShowHelpWindow(VerisimilarPl.helpTopics);
 			</OnClick>
 			</Scripts>
 		</Button>
@@ -112,7 +129,7 @@
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
 								<Offset>
-									<AbsDimension x="20" y="-30"/>
+									<AbsDimension x="20" y="-35"/>
 								</Offset>
 						</Anchor>
 					</Anchors>
@@ -166,7 +183,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
 									<Offset>
-										<AbsDimension x="20" y="-30"/>
+										<AbsDimension x="20" y="-35"/>
 									</Offset>
 							</Anchor>
 						</Anchors>

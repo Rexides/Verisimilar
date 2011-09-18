@@ -53,6 +53,21 @@
 																						end,
 																					checked=(VerisimilarMinimapButton.openDefault=="GM")};
 														end
+														menuTable[#menuTable+1]={text="Guides:",
+																					isTitle=true};
+														menuTable[#menuTable+1]={text="Player Guide"}
+														if (IsAddOnLoaded("VerisimilarPlayer")) then
+															menuTable[#menuTable].func=function()VerisimilarPl:ShowHelpWindow(VerisimilarPl.helpTopics);end;
+														else
+															menuTable[#menuTable].disabled=true;
+														end
+														
+														menuTable[#menuTable+1]={text="GM Guide"}
+														if(IsAddOnLoaded("VerisimilarGM"))then
+															menuTable[#menuTable].func=function()VerisimilarPl:ShowHelpWindow(VerisimilarGM.helpTopics);end;
+														else
+															menuTable[#menuTable].disabled=true;
+														end
 														tinsert(menuTable, {text="Options",func=function()InterfaceOptionsFrame_OpenToCategory(VerisimilarPl.optionsFrame);end})
 														 VSdewdrop:FeedTable(menuTable);
 														
