@@ -6,6 +6,10 @@ end
 
 function VerisimilarPl:ShowHelpWindow(topics)
 	helpTopics = topics;
+	if(helpTopics.selection == 1)then
+		helpTopics.selection = helpTopics[1];
+	end
+	VHelpFrame.textPanel.scroll.text:SetText(helpTopics.selection.text);
 	VHelpFrameTitleText:SetText(topics.title);
 	VerisimilarPl:UpdateTopicList();
 	VHelpFrame:Show();
@@ -18,7 +22,7 @@ function VerisimilarPl:UpdateTopicList()
 
 	local numEntries = #helpTopics;
 	for i=1,#helpTopics do
-		if(helpTopics[i].expanded)then
+		if(not helpTopics[i].collapsed)then
 			numEntries=numEntries+#helpTopics[i];
 		end
 	end
@@ -27,15 +31,13 @@ function VerisimilarPl:UpdateTopicList()
 
 	FauxScrollFrame_Update(VHelpFrame.topicList.list, numEntries, numButtons, buttons[1]:GetHeight());
 
-	--if ( selection ) then
-		OptionsList_ClearSelection(VHelpFrame.topicList, VHelpFrame.topicList.buttons);
-	--end
+	OptionsList_ClearSelection(VHelpFrame.topicList, VHelpFrame.topicList.buttons);
 
 	local j=1;
 	local chapter=1;
 	local paragraph=0;
 	while (offset>0)do
-		if(helpTopics[chapter].expanded and paragraph<=#helpTopics[chapter])then
+		if(not helpTopics[chapter].collapsed and paragraph<=#helpTopics[chapter])then
 			paragraph = paragraph+1;
 		else
 			chapter = chapter+1;
@@ -50,10 +52,10 @@ function VerisimilarPl:UpdateTopicList()
 		else
 			self:UpdateTopicListButton(buttons[i], entry);
 
-			if ( selection ) and ( selection == entry ) and ( not VHelpFrame.topicList.selection ) then
+			if ( helpTopics.selection ) and ( helpTopics.selection == entry ) then
 				OptionsList_SelectButton(VHelpFrame.topicList, buttons[i]);
 			end
-			if(helpTopics[chapter].expanded and paragraph<#helpTopics[chapter])then
+			if(not helpTopics[chapter].collapsed and paragraph<#helpTopics[chapter])then
 				paragraph = paragraph+1;
 			else
 				chapter = chapter+1;
@@ -66,6 +68,7 @@ function VerisimilarPl:UpdateTopicList()
 	if ( selection ) then
 		VHelpFrame.topicList.selection = selection;
 	end
+	VerisimilarPl:ManageNavButtons();
 end
 
 function VerisimilarPl:GetActiveTopic()
@@ -77,22 +80,26 @@ function VerisimilarPl:UpdateTopicListButton(button, entry)
 	button.entry = entry;
 	local filter=VHelpFrame.topicFilter:GetText();
 	if (#entry==0) then
-		--if(filter~="" and self:FilterElement(entry.entry,filter))then
-		--	button:SetNormalFontObject(GameFontGreenSmall);
-		--else
+		if(filter~="" and strfind(strlower(entry.text),strlower(filter)))then
+			button:SetNormalFontObject(GameFontGreenSmall);
+		else
 			button:SetNormalFontObject(GameFontNormalSmall);
-		--end
+		end
 		button:SetHighlightFontObject(GameFontHighlightSmall);
 		button.text:SetPoint("LEFT", 16, 2);
 	else
-		button:SetNormalFontObject(GameFontNormal);
+		if(filter~="" and strfind(strlower(entry.text),strlower(filter)))then
+			button:SetNormalFontObject(GameFontGreen);
+		else
+			button:SetNormalFontObject(GameFontNormal);
+		end
 		button:SetHighlightFontObject(GameFontHighlight);
 		button.text:SetPoint("LEFT", 8, 2);
 	end
 	button.text:SetText(entry.title);
 
 	if (#entry>0) then
-		if (not entry.expanded) then
+		if (entry.collapsed) then
 			button.toggle:SetNormalTexture("Interface\\Buttons\\UI-PlusButton-UP");
 			button.toggle:SetPushedTexture("Interface\\Buttons\\UI-PlusButton-DOWN");
 		else
@@ -106,14 +113,77 @@ function VerisimilarPl:UpdateTopicListButton(button, entry)
 end
 
 function VerisimilarPl:ToggleTopicListEntry(entry)
-	entry.expanded=not entry.expanded;
-	VerisimilarPl:UpdateTopicList()
+	entry.collapsed=not entry.collapsed;
+	VerisimilarPl:UpdateTopicList();
 end
 
 function VerisimilarPl:TopicFilterTextChanged(editbox)
+	VerisimilarPl:UpdateTopicList();
+end
 
+function VerisimilarPl:ManageNavButtons()
+	if(helpTopics[#helpTopics][#helpTopics[#helpTopics]] == helpTopics.selection)then
+		VHelpFrame.nextButton:Disable();
+	else
+		VHelpFrame.nextButton:Enable();
+	end
+	if(helpTopics[1] == helpTopics.selection or helpTopics.selection == nil)then
+		VHelpFrame.prevButton:Disable();
+	else
+		VHelpFrame.prevButton:Enable();
+	end
 end
 
 function VerisimilarPl:TopicClicked(panelButton,mouseButton)
-	VHelpFrame.textPanel.text:SetText(panelButton.entry.text)
+	VHelpFrame.textPanel.scroll.text:SetText(panelButton.entry.text);
+	helpTopics.selection = panelButton.entry;
+	OptionsList_ClearSelection(VHelpFrame.topicList, VHelpFrame.topicList.buttons);
+	OptionsList_SelectButton(VHelpFrame.topicList, panelButton);
+	VerisimilarPl:ManageNavButtons();
+end
+
+function VerisimilarPl:PreviousHelpTopic()
+	local previous;
+	local found;
+	for i=1, #helpTopics do
+		if(helpTopics[i] == helpTopics.selection or found)then
+			break;
+		end
+		previous = helpTopics[i];
+		for j=1, #helpTopics[i] do
+			if(helpTopics[i][j] == helpTopics.selection)then
+				found = true; 
+				break;
+			end
+			previous = helpTopics[i][j];
+		end
+	end
+	helpTopics.selection = previous;
+	VHelpFrame.textPanel.scroll.text:SetText(previous.text);
+	self:UpdateTopicList();
+	
+end
+
+function VerisimilarPl:NextHelpTopic()
+	local previous;
+	local found;
+	for i=1, #helpTopics do
+		if(previous == helpTopics.selection)then
+			if (not found)then
+				found = helpTopics[i];
+			end
+			break;
+		end
+		previous = helpTopics[i];
+		for j=1, #helpTopics[i] do
+			if(previous == helpTopics.selection)then
+				found = helpTopics[i][j]; 
+				break;
+			end
+			previous = helpTopics[i][j];
+		end
+	end
+	helpTopics.selection = found;
+	VHelpFrame.textPanel.scroll.text:SetText(found.text);
+	self:UpdateTopicList();
 end

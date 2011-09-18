@@ -130,25 +130,42 @@
 				</BackgroundInsets>
 			</Backdrop>
 			<Frames>
-				<SimpleHTML name="$parentText" parentKey="text">
+				<ScrollFrame name="$parentScroll" parentKey="scroll" inherits="UIPanelScrollFrameTemplate">
 					<Anchors>
-						<Anchor point="TOPLEFT">
+						<Anchor point="TOPLEFT" relativeTo="$parent">
 							<Offset>
 								<AbsDimension x="10" y="-10"/>
 							</Offset>
 						</Anchor>
-						<Anchor point="BOTTOMRIGHT">
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parent">
 							<Offset>
-								<AbsDimension x="-10" y="10"/>
+								<AbsDimension x="-30" y="10"/>
 							</Offset>
 						</Anchor>
 					</Anchors>
-					<Scripts>
-						<OnLoad>
-							self:SetFontObject(GameTooltipTextSmall);
-						</OnLoad>
-					</Scripts>
-				</SimpleHTML>
+					<ScrollChild>
+						<SimpleHTML name="$parentText" parentKey="text">
+							<Size x="380" y="245"/>
+							<Anchors>
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="0" y="0"/>
+									</Offset>
+								</Anchor>
+								<!--<Anchor point="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="0" y="0"/>
+									</Offset>
+								</Anchor>-->
+							</Anchors>
+							<Scripts>
+								<OnLoad>
+									self:SetFontObject(GameTooltipTextSmall);
+								</OnLoad>
+							</Scripts>
+						</SimpleHTML>
+					</ScrollChild>
+				</ScrollFrame>
 			</Frames>
 			<Scripts>
 				<OnLoad>
@@ -156,7 +173,7 @@
 				</OnLoad>
 			</Scripts>
 		</Frame>
-		<Button name="$parentPreviousButton" inherits="UIPanelButtonTemplate" text="Previous topic" >
+		<Button name="$parentPreviousButton" inherits="UIPanelButtonTemplate" text="Previous topic" parentKey="prevButton">
 			<Size>
 				<AbsDimension x="160" y="22"/>
 			</Size>
@@ -169,11 +186,11 @@
 			</Anchors>
 			<Scripts>
 				<OnClick> 
-					--InterfaceOptionsFrame_OpenToCategory(VerisimilarPl.optionsFrame)
+					VerisimilarPl:PreviousHelpTopic();
 				</OnClick>
 			</Scripts>
 		</Button>
-		<Button name="$parentNextButton" inherits="UIPanelButtonTemplate" text="Next topic" >
+		<Button name="$parentNextButton" inherits="UIPanelButtonTemplate" text="Next topic" parentKey="nextButton">
 			<Size>
 				<AbsDimension x="160" y="22"/>
 			</Size>
@@ -186,7 +203,7 @@
 			</Anchors>
 			<Scripts>
 				<OnClick> 
-					--InterfaceOptionsFrame_OpenToCategory(VerisimilarPl.optionsFrame)
+					VerisimilarPl:NextHelpTopic();
 				</OnClick>
 			</Scripts>
 		</Button>
