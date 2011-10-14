@@ -135,7 +135,7 @@ function VerisimilarPl:ManageNavButtons()
 end
 
 function VerisimilarPl:TopicClicked(panelButton,mouseButton)
-	VHelpFrame.textPanel.scroll.text:SetText(panelButton.entry.text);
+	self:SetPanelText(panelButton.entry.text);
 	helpTopics.selection = panelButton.entry;
 	OptionsList_ClearSelection(VHelpFrame.topicList, VHelpFrame.topicList.buttons);
 	OptionsList_SelectButton(VHelpFrame.topicList, panelButton);
@@ -159,7 +159,7 @@ function VerisimilarPl:PreviousHelpTopic()
 		end
 	end
 	helpTopics.selection = previous;
-	VHelpFrame.textPanel.scroll.text:SetText(previous.text);
+	self:SetPanelText(previous.text);
 	self:UpdateTopicList();
 	
 end
@@ -184,6 +184,11 @@ function VerisimilarPl:NextHelpTopic()
 		end
 	end
 	helpTopics.selection = found;
-	VHelpFrame.textPanel.scroll.text:SetText(found.text);
+	self:SetPanelText(found.text);
 	self:UpdateTopicList();
+end
+
+function VerisimilarPl:SetPanelText(text)
+	--text, pos = text:gsub("%'", "&apos;");
+	VHelpFrame.textPanel.scroll.text:SetText(text);
 end

@@ -33,6 +33,20 @@ function VerisimilarPl:InitializeSessionPanel()
 										self:SessionClicked(data[realrow].session);
 									end
 								end,
+				["OnEnter"] = function (rowFrame, cellFrame, data, cols, row, realrow, column, table, ...)
+									if(data[realrow])then
+										GameTooltip:ClearLines();
+										GameTooltip:SetOwner(rowFrame, "ANCHOR_BOTTOMRIGHT");
+										GameTooltip:AddLine(data[realrow].session.name,nil,nil,nil,1);
+										GameTooltip:Show();
+									end
+								end,
+				["OnLeave"] = function (rowFrame, cellFrame, data, cols, row, realrow, column, table, ...)
+									if(data[realrow])then
+										GameTooltip:Hide();
+										GameTooltip:ClearLines();
+									end
+								end,
 			});
 	
 	StaticPopupDialogs["VERISIMILAR_QUERY_PLAYER"] = {

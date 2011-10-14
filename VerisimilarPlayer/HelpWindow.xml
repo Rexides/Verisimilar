@@ -145,7 +145,7 @@
 					</Anchors>
 					<ScrollChild>
 						<SimpleHTML name="$parentText" parentKey="text">
-							<Size x="380" y="245"/>
+							<Size x="370" y="245"/>
 							<Anchors>
 								<Anchor point="TOPLEFT">
 									<Offset>
@@ -158,9 +158,11 @@
 									</Offset>
 								</Anchor>-->
 							</Anchors>
+							<FontStringHeader1 inherits="GameFontHighlightLarge"/>
+							<FontString inherits="GameFontHighlight"/>
 							<Scripts>
 								<OnLoad>
-									self:SetFontObject(GameTooltipTextSmall);
+									--self:SetFontObject(GameTooltipTextSmall);
 								</OnLoad>
 							</Scripts>
 						</SimpleHTML>
