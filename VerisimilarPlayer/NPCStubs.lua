@@ -69,8 +69,8 @@ function VerisimilarPl:AddNPCStubData(stubData,stubInfo)
 	stubData.gossipData={}
 	for i=0,#stubInfo.g/2-1 do
 		stubData.gossipData[i]={};
-		stubData.gossipData[i].text=stubInfo.g[(i*2)+1];
-		stubData.gossipData[i].gossip=stubInfo.g[(i*2)+2];
+		stubData.gossipData[i].optionText=stubInfo.g[(i*2)+1];
+		stubData.gossipData[i].gossipText=stubInfo.g[(i*2)+2];
 	end
 	testNPC=stubData
 end
@@ -207,7 +207,7 @@ end
 function VerisimilarPl:NPC_DEFAULT_GOSSIP(stub,gossip)
 	stub.defaultGossip={};
 	if(type(gossip.t)=="number")then
-		stub.defaultGossip.text=stub.gossipData[gossip.t].gossip
+		stub.defaultGossip.text=stub.gossipData[gossip.t].gossipText;
 	else
 		stub.defaultGossip.text=gossip.t;
 	end
@@ -215,9 +215,9 @@ function VerisimilarPl:NPC_DEFAULT_GOSSIP(stub,gossip)
 		local text=gossip[((i-1)*2)+1];
 		stub.defaultGossip[i]={};
 		if(type(text)=="number")then
-			stub.defaultGossip[i].text=stub.gossipData[text].text;
+			stub.defaultGossip[i].optionText=stub.gossipData[text].optionText;
 		else
-			stub.defaultGossip[i].text=text;
+			stub.defaultGossip[i].optionText=text;
 		end
 		stub.defaultGossip[i].choice=gossip[((i-1)*2)+2];
 	end
@@ -227,7 +227,7 @@ end
 function VerisimilarPl:NPC_GOSSIP(stub,gossip)
 	stub.gossip={};
 	if(type(gossip.t)=="number")then
-		stub.gossip.text=stub.gossipData[gossip.t].gossip
+		stub.gossip.text=stub.gossipData[gossip.t].gossipText;
 	else
 		stub.gossip.text=gossip.t;
 	end
@@ -235,9 +235,9 @@ function VerisimilarPl:NPC_GOSSIP(stub,gossip)
 		local text=gossip[((i-1)*2)+1];
 		stub.gossip[i]={};
 		if(type(text)=="number")then
-			stub.gossip[i].text=stub.gossipData[text].text;
+			stub.gossip[i].optionText=stub.gossipData[text].optionText;
 		else
-			stub.gossip[i].text=text;
+			stub.gossip[i].optionText=text;
 		end
 		stub.gossip[i].choice=gossip[((i-1)*2)+2];
 	end
@@ -375,7 +375,7 @@ function VerisimilarPl:CreateGossipOptionsTable()
 	if(self.currentGossipStub)then
 		local gossip=self.currentGossipStub.gossip or self.currentGossipStub.defaultGossip;
 		for i=1,#gossip do
-			tinsert(self.gossipOptions,{stub=self.currentGossipStub,text=gossip[i].text,choice=gossip[i].choice,lastClicked=0});
+			tinsert(self.gossipOptions,{stub=self.currentGossipStub,optionText=gossip[i].optionText,choice=gossip[i].choice,lastClicked=0});
 		end
 	else
 		for _,session in pairs(self.sessions)do
@@ -385,11 +385,11 @@ function VerisimilarPl:CreateGossipOptionsTable()
 						local gossip=stub.gossip or stub.defaultGossip;
 						if(stub.gossip)then
 							for key, val in pairs(stub.gossip)do
-								self:Print(key,val)
+								self:PrintDebug(key,val)
 							end
 						end
 						for i=1,#gossip do
-							tinsert(self.gossipOptions,{stub=stub,text=gossip[i].text,choice=gossip[i].choice,lastClicked=0})
+							tinsert(self.gossipOptions,{stub=stub,PrintDebug=gossip[i].PrintDebug,choice=gossip[i].choice,lastClicked=0})
 						end
 					end
 				end
@@ -403,7 +403,7 @@ function VerisimilarPl:GetGossipOptions()
 	local gossipOptions={self.hooks.GetGossipOptions()};
 	self:CreateGossipOptionsTable()
 	for i=1,#self.gossipOptions do
-		tinsert(gossipOptions,self.gossipOptions[i].text);
+		tinsert(gossipOptions,self.gossipOptions[i].optionText);
 		tinsert(gossipOptions,"gossip");
 	end
 	
@@ -428,7 +428,7 @@ function VerisimilarPl:GetGossipText()
 			if(session.connected)then
 				for _,stub in pairs(session.stubs)do
 					if(stub.enabled and stub.type=="NPC" and stub.name==NPCName and stub.exists and (stub.visible or stub.targetTalk))then
-						local addGossip=stub.gossip.text or stub.defaultGossip.text;
+						local addGossip=(stub.gossip and stub.gossip.text) or stub.defaultGossip.text;
 						if(type(addGossip)=="number")then
 							addGossip = stub.gossipData[addGossip].gossip;
 						end

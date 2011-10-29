@@ -54,9 +54,9 @@ function VerisimilarGM.NPCFuncs:SendPlayerData(player)
 	local playerData=player.elements[self.id];
 	local session=self:GetSession();
 	local NPCdata=player.elements[self.id];
-	NPCdata.defaultGossip.text=0;
+	NPCdata.defaultGossip.gossipText=0; --Can also be string
 	NPCdata.defaultGossip.options={};
-	self:SendNewDefaultGossip(player)
+	self:SendNewDefaultGossip(player);
 	NPCdata.exists=self:existenceScript(player,NPCdata.exists);
 	if(not NPCdata.exists)then
 		VerisimilarGM:SendSessionMessage(player,self:GetSession(),self,"NPC_EXISTENCE",false);
@@ -85,8 +85,8 @@ function VerisimilarGM.NPCFuncs:GetStub(player)
 				};
 	stub.g={};
 	for i=0,#self.gossipOptions do
-		tinsert(stub.g,self.gossipOptions[i].text);
-		tinsert(stub.g,self.gossipOptions[i].gossip);
+		tinsert(stub.g,self.gossipOptions[i].optionText);
+		tinsert(stub.g,self.gossipOptions[i].gossipText);
 	end
 	self.stub=stub;
 	return stub;
@@ -278,37 +278,37 @@ end
 
 function VerisimilarGM.NPCFuncs:GetOptionText(index)
 	index=index or 0
-	return self.gossipOptions[index] and self.gossipOptions[index].text;
+	return self.gossipOptions[index] and self.gossipOptions[index].optionText;
 end
 
 function VerisimilarGM.NPCFuncs:SetOptionText(index,text)
 	if(self.enabled==true and self:GetSession():IsEnabled()==true)then return end
 	index=index or 0
-	if(self.gossipOptions[index] and text and self.gossipOptions[index].text~=text)then
+	if(self.gossipOptions[index] and text and self.gossipOptions[index].optionText~=text)then
 		self:GenerateNewVersion()
-		self.gossipOptions[index].text=text;
+		self.gossipOptions[index].optionText=text;
 	end
 end
 
 function VerisimilarGM.NPCFuncs:GetOptionGossip(index)
 	index=index or 0
-	return self.gossipOptions[index] and self.gossipOptions[index].gossip;
+	return self.gossipOptions[index] and self.gossipOptions[index].gossipText;
 end
 
 function VerisimilarGM.NPCFuncs:SetOptionGossip(index,text)
 	if(self.enabled==true and self:GetSession():IsEnabled()==true)then return end
 	
 	index=index or 0
-	if(self.gossipOptions[index] and text and self.gossipOptions[index].gossip~=text)then
+	if(self.gossipOptions[index] and text and self.gossipOptions[index].gossipText~=text)then
 		self:GenerateNewVersion()
-		self.gossipOptions[index].gossip=text;
+		self.gossipOptions[index].gossipText=text;
 	end
 end
 
 function VerisimilarGM.NPCFuncs:AddOption()
 	if(self.enabled==true and self:GetSession():IsEnabled()==true)then return end
 	self:GenerateNewVersion()
-	tinsert(self.gossipOptions,{text="",gossip=""})
+	tinsert(self.gossipOptions,{optionText="",gossipText=""})
 end
 
 function VerisimilarGM.NPCFuncs:RemoveOption(index)
@@ -382,23 +382,24 @@ function VerisimilarGM.NPCFuncs:SendNewDefaultGossip(player)
 	
 	local NPCdata=player.elements[self.id];
 	local gossipText,options=self:gossipScript(player,0);
-	
-	if(NPCdata.defaultGossip.text~=gossipText or checkOptions(NPCdata.defaultGossip.options,options))then
-		NPCdata.defaultGossip.text=gossipText;
+	VerisimilarPl:PrintDebug("Atempting to send gossip");
+	if(NPCdata.defaultGossip.gossipText~=gossipText or checkOptions(NPCdata.defaultGossip.options,options))then
+		NPCdata.defaultGossip.gossipText=gossipText;
 		NPCdata.defaultGossip.options=options;
-		local data={t=NPCdata.defaultGossip.text}
+		local data={t=NPCdata.defaultGossip.gossipText}
 		for i=1,#NPCdata.defaultGossip.options do
 			tinsert(data,NPCdata.defaultGossip.options[i].text);
 			tinsert(data,NPCdata.defaultGossip.options[i].choice);
 		end
 		VerisimilarGM:SendSessionMessage(player,session,self,"NPC_DEFAULT_GOSSIP",data);
+		VerisimilarPl:PrintDebug("sending gossip");
 	end
 end
 
 function VerisimilarGM.NPCFuncs:SendGossip(player,choice)
 	local session=self:GetSession();
-	local gossip,options=self:gossipScript(player,choice);
-	local data={t=gossip,c=choice}
+	local gossipText,options=self:gossipScript(player,choice);
+	local data={t=gossipText,c=choice}
 	for i=1,#options do
 		tinsert(data,options[i].text);
 		tinsert(data,options[i].choice);
