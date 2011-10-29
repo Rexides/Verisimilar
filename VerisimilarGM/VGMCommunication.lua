@@ -17,7 +17,6 @@ end
 function VerisimilarGM:OnCommReceived(prefix,messageString,channel,sender)
 	local inboundQue={VerisimilarPl:Deserialize(messageString)}
 	if(not inboundQue[1])then return end
-	VerisimilarPl:PrintDebug("Got messages:")
 	for i=2,#inboundQue,2 do
 		local header=inboundQue[i];
 		local data=inboundQue[i+1];
@@ -26,7 +25,7 @@ function VerisimilarGM:OnCommReceived(prefix,messageString,channel,sender)
 
 		if(message)then
 			if(not VerisimilarPl[message])then
-				VerisimilarPl:PrintDebug("Got message: ",i/2,message,data);
+				VerisimilarPl:PrintDebug("GM got message: ",i/2,message,data);
 			end
 			if(not session)then
 				if(self[message])then

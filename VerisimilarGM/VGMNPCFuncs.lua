@@ -383,7 +383,6 @@ function VerisimilarGM.NPCFuncs:SendNewDefaultGossip(player)
 	local NPCdata=player.elements[self.id];
 	local gossipText,options=self:gossipScript(player,0);
 	
-	
 	if(NPCdata.defaultGossip.text~=gossipText or checkOptions(NPCdata.defaultGossip.options,options))then
 		NPCdata.defaultGossip.text=gossipText;
 		NPCdata.defaultGossip.options=options;

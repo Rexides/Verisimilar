@@ -209,6 +209,7 @@ function VerisimilarPl:AddQuestStubData(stubData,stubInfo)
 	if(stubInfo.o)then
 		for i=1,#stubInfo.o do
 			local x,y=self:DecodeCoordinates(stubInfo.o[i].c);
+			self:PrintDebug("Filter:",stubInfo.o[i].f);
 			tinsert(stubData.objectivesInfo,{text=stubInfo.o[i].ot,targetValue=stubInfo.o[i].tv,event=VerisimilarPl.eventList[stubInfo.o[i].e],filter={strsplit(",",stubInfo.o[i].f)},zone=stubInfo.o[i].z,level=stubInfo.o[i].l,x=x,y=y});
 		end
 	end
@@ -1450,7 +1451,7 @@ function VerisimilarPl:GetQuestItemInfo(itemType, itemNum)
 		elseif(itemType=="required")then
 			local count=0;
 			for i=1,#VerisimilarPl.offeredQuest.objectivesInfo do
-				local wItem=VerisimilarPl.offeredQuest.objectives[i].filter[1];
+				local wItem=VerisimilarPl.offeredQuest.objectivesInfo[i].filter[1];
 				local icon=GetItemIcon(wItem, true);
 				local itemStub=VerisimilarPl.offeredQuest.session.stubs[wItem];
 				if(VerisimilarPl.offeredQuest.objectivesInfo[i].event=="Item" and (icon or (itemStub and itemStub.type=="Item" and itemStub.enabled)))then

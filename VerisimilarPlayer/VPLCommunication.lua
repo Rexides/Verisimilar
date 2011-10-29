@@ -15,7 +15,6 @@ local CONNECTION_RETRY_ATTEMPTS=3
 function VerisimilarPl:OnCommReceived(prefix,messageString,channel,sender)
 	local inboundQue={VerisimilarPl:Deserialize(messageString)}
 	if(not inboundQue[1])then return end
-	self:PrintDebug("Got messages:")
 	for i=2,#inboundQue,2 do
 		local header=inboundQue[i];
 		local data=inboundQue[i+1];
@@ -23,7 +22,7 @@ function VerisimilarPl:OnCommReceived(prefix,messageString,channel,sender)
 		
 		if(message and self[message])then
 			
-			self:PrintDebug(i/2,":",message)
+			self:PrintDebug("Player Got message:",i/2,":",message)
 			if(message=="STUBS")then
 				for j=1,#data do
 					self:PrintDebug("name:",data[j].n or data[j].tl)

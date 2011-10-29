@@ -68,7 +68,6 @@ function VerisimilarPl:AddNPCStubData(stubData,stubInfo)
 	stubData.captureSayings=stubInfo.cs;
 	stubData.gossipData={}
 	for i=0,#stubInfo.g/2-1 do
-		print(i)
 		stubData.gossipData[i]={};
 		stubData.gossipData[i].text=stubInfo.g[(i*2)+1];
 		stubData.gossipData[i].gossip=stubInfo.g[(i*2)+2];
@@ -429,8 +428,11 @@ function VerisimilarPl:GetGossipText()
 			if(session.connected)then
 				for _,stub in pairs(session.stubs)do
 					if(stub.enabled and stub.type=="NPC" and stub.name==NPCName and stub.exists and (stub.visible or stub.targetTalk))then
-						local gossip=stub.gossip or stub.defaultGossip;
-						gossipText=gossipText..gossip.text.."\n\n";
+						local addGossip=stub.gossip.text or stub.defaultGossip.text;
+						if(type(addGossip)=="number")then
+							addGossip = stub.gossipData[addGossip].gossip;
+						end
+						gossipText=gossipText..addGossip.."\n\n";
 					end
 				end
 			end
