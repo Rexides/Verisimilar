@@ -18,7 +18,7 @@ function VerisimilarGM:InitializeNPC(NPC)
 	NPC.environmentIcon=true
 	NPC.targetTalk=1;
 	NPC.captureSayings=true;
-	NPC.gossipOptions={[0]={text="",gossip=""}}
+	NPC.gossipOptions={[0]={optionText="",gossipText=""}}
 	NPC.gossipScriptText="function(NPC,player,choice)\n    local gossip=choice;\n    local options={};\n    for i=1,NPC:GetNumGossipOptions() do\n        if(i~=choice)then\n            table.insert(options,{text=i,choice=i});\n        end\n    end\n    return gossip,options;\nend";
 	NPC.gossipScript=nil
 	NPC.existenceScriptText="function(NPC,player,exists)\n    return exists;\nend";

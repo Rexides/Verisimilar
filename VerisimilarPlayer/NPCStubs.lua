@@ -389,7 +389,7 @@ function VerisimilarPl:CreateGossipOptionsTable()
 							end
 						end
 						for i=1,#gossip do
-							tinsert(self.gossipOptions,{stub=stub,PrintDebug=gossip[i].PrintDebug,choice=gossip[i].choice,lastClicked=0})
+							tinsert(self.gossipOptions,{stub=stub,optionText=gossip[i].optionText,choice=gossip[i].choice,lastClicked=0})
 						end
 					end
 				end
@@ -406,7 +406,9 @@ function VerisimilarPl:GetGossipOptions()
 		tinsert(gossipOptions,self.gossipOptions[i].optionText);
 		tinsert(gossipOptions,"gossip");
 	end
-	
+	for i=1,#gossipOptions do
+		self:PrintDebug(gossipOptions[i]);
+	end
 	
 	return unpack(gossipOptions);
 end
