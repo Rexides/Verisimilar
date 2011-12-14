@@ -418,8 +418,10 @@ function VerisimilarGM.QuestFuncs:GetProgressText()
 end
 
 function VerisimilarGM.QuestFuncs:SetCompletionText(text)
+	VerisimilarPl:PrintDebug("text " .. text);
 	if(self.enabled==true and self:GetSession():IsEnabled()==true)then return end
 	if(text and self.completionText~=text)then
+		VerisimilarPl:PrintDebug("moika  ");
 		self:GenerateNewVersion()
 		self.completionText=text;
 	end
@@ -537,7 +539,7 @@ function VerisimilarGM.QuestFuncs:CheckAvailability(player,event,parameter,arg1,
 	local prevAvailable=questVar.available;
 	questVar.available=self:IsAvailableToPlayer(player,event,parameter,arg1,arg2,arg3);
 	if(questVar.available~=prevAvailable)then
-		VerisimilarGM:SendSessionMessage(player,session,self,"QUEST_AVAILABILITY",questVar.available);
+		VerisimilarGM:SendSessionMessage(player,self:GetSession(),self,"QUEST_AVAILABILITY",questVar.available);
 	end
 end
 

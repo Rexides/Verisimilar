@@ -82,9 +82,9 @@ function VerisimilarGM:OnInitialize()
 	self:Print("Version:",self.version);
 	self:CreateZoneMapInfo();
 	local sessionList=VerisimilarGM.db.global.sessions;
-	if(sessionList["Demo Session"]==nil)then
+	--[[if(sessionList["Demo Session"]==nil)then
 		sessionList["Demo Session"]=VerisimilarDemoSession;
-	end
+	end]]
 	if(VerisimilarGM.db.global.oldSessionsImported==false)then --This is so we can import the old per-character session lists to the new global list just once when 0.15 runs for the first time
 		VerisimilarGM:ImportOldSessions(sessionList);
 		VerisimilarGM.db.global.oldSessionsImported=true;

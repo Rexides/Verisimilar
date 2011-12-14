@@ -1,20 +1,17 @@
 --[[
 Name: LibTourist-3.0
-Revision: $Rev: 102 $
-Author(s): ckknight (ckknight@gmail.com), Arrowmaster
+Revision: $Rev: 130 $
+Author(s): ckknight (ckknight@gmail.com), Arrowmaster, Odica
 Website: http://ckknight.wowinterface.com/
 Documentation: http://www.wowace.com/addons/libtourist-3-0/
 SVN: svn://svn.wowace.com/wow/libtourist-3-0/mainline/trunk
 Description: A library to provide information about zones and instances.
 Dependencies: LibBabble-Zone-3.0
 License: MIT
-
-Note:
-Some WOTLK data is unconfirmed / incomplete
 ]]
 
 local MAJOR_VERSION = "LibTourist-3.0"
-local MINOR_VERSION = 90000 + tonumber(("$Revision: 102 $"):match("(%d+)"))
+local MINOR_VERSION = 90000 + tonumber(("$Revision: 130 $"):match("(%d+)"))
 
 if not LibStub then error(MAJOR_VERSION .. " requires LibStub") end
 if not LibStub("LibBabble-Zone-3.0") then error(MAJOR_VERSION .. " requires LibBabble-Zone-3.0.") end
@@ -31,9 +28,8 @@ if oldLib then
 	end
 end
 
-
 function trace(msg)
---	DEFAULT_CHAT_FRAME:AddMessage(msg);
+--	DEFAULT_CHAT_FRAME:AddMessage(msg)
 end
 
 local BZ = LibStub("LibBabble-Zone-3.0"):GetLookupTable()
@@ -123,19 +119,17 @@ local function PLAYER_LEVEL_UP(self, level)
 	for zone in pairs(lows) do
 		if not self:IsHostile(zone) then
 			local low, high = self:GetLevel(zone)
-			if types[zone] == "Zone" or types[zone] == "PvP Zone" and low and high then
+			local zoneType = self:GetType(zone)
+			if zoneType == "Zone" or zoneType == "PvP Zone" and low and high then
 				if low <= playerLevel and playerLevel <= high then
 					recZones[zone] = true
 				end
-			elseif types[zone] == "Battleground" and low and high then
+			elseif zoneType == "Battleground" and low and high then
 				local playerLevel = playerLevel
-				if zone == BZ["Alterac Valley"] then
-					playerLevel = playerLevel - 1
-				end
 				if playerLevel >= low and (playerLevel == MAX_PLAYER_LEVEL or math.fmod(playerLevel, 10) >= 6) then
 					recInstances[zone] = true
 				end
-			elseif types[zone] == "Instance" and low and high then
+			elseif zoneType == "Instance" and low and high then
 				if low <= playerLevel and playerLevel <= high then
 					recInstances[zone] = true
 				end
@@ -144,65 +138,75 @@ local function PLAYER_LEVEL_UP(self, level)
 	end
 end
 
--- minimum fishing skill to fish these zones
+-- Minimum fishing skill to fish these zones junk-free
 function Tourist:GetFishingLevel(zone)
 	return fishing[zone]
 end
 
 function Tourist:GetLevel(zone)
 	if types[zone] == "Battleground" then
-		if zone == BZ["Strand of the Ancients"] or ((zone == BZ["Eye of the Storm"] or zone == BZ["Alterac Valley"]) and playerLevel >= 71) then
-			return 71, 80
-		elseif zone == BZ["Eye of the Storm"] or (zone == BZ["Alterac Valley"] and playerLevel >= 61) then
-			return 61, 70
-		elseif zone == BZ["Alterac Valley"] then
-			return 51, 60
-		elseif playerLevel >= MAX_PLAYER_LEVEL then
+		-- Note: Not all BG's start at level 10, but all BG's support players up to MAX_PLAYER_LEVEL.
+		
+		local playerLvl = playerLevel
+		if playerLvl <= lows[zone] then
+			-- Player is too low level to enter the BG -> return the lowest available bracket
+			-- by assuming the player is at the min level required for the BG.
+			playerLvl = lows[zone]
+		end
+	
+		-- Find the most suitable bracket
+		if playerLvl >= MAX_PLAYER_LEVEL then
 			return MAX_PLAYER_LEVEL, MAX_PLAYER_LEVEL
-		elseif playerLevel >= 70 then
-			return 70, 79
-		elseif playerLevel >= 60 then
-			return 60, 69
-		elseif playerLevel >= 50 then
-			return 50, 59
-		elseif playerLevel >= 40 then
-			return 40, 49
-		elseif playerLevel >= 30 then
-			return 30, 39
-		elseif playerLevel >= 20 or zone == BZ["Arathi Basin"] then
-			return 20, 29
+		elseif playerLvl >= 80 then
+			return 80, 84
+		elseif playerLvl >= 75 then
+			return 75, 79
+		elseif playerLvl >= 70 then
+			return 70, 74
+		elseif playerLvl >= 65 then
+			return 65, 69
+		elseif playerLvl >= 60 then
+			return 60, 64
+		elseif playerLvl >= 55 then
+			return 55, 59
+		elseif playerLvl >= 50 then
+			return 50, 54
+		elseif playerLvl >= 45 then
+			return 45, 49
+		elseif playerLvl >= 40 then
+			return 40, 44
+		elseif playerLvl >= 35 then
+			return 35, 39
+		elseif playerLvl >= 30 then
+			return 30, 34
+		elseif playerLvl >= 25 then
+			return 25, 29
+		elseif playerLvl >= 20 then
+			return 20, 24
+		elseif playerLvl >= 15 then
+			return 15, 19
 		else
-			return 10, 19
+			return 10, 14
 		end
 	end
+	
+	-- All non-battlegrounds:
 	return lows[zone], highs[zone]
 end
 
+
 function Tourist:GetLevelColor(zone)
+	local low, high = self:GetLevel(zone)
+
 	if types[zone] == "Battleground" then
-		if (playerLevel < 71 and zone == BZ["Strand of the Ancients"]) or (playerLevel < 61 and zone == BZ["Eye of the Storm"]) or (playerLevel < 51 and zone == BZ["Alterac Valley"]) or (playerLevel < 20 and zone == BZ["Arathi Basin"]) or (playerLevel < 10 and zone == BZ["Warsong Gulch"]) then
+		if playerLevel < low then
+			-- player cannot enter the lowest bracket of the BG -> red
 			return 1, 0, 0
 		end
-		local playerLevel = playerLevel
-		if zone == BZ["Alterac Valley"] or zone == BZ["Eye of the Storm"] or zone == BZ["Strand of the Ancients"] then
-			playerLevel = playerLevel - 1
-		end
-		if playerLevel == MAX_PLAYER_LEVEL then
-			return 1, 1, 0
-		end
-		playerLevel = math.fmod(playerLevel, 10)
-		if playerLevel <= 5 then
-			return 1, playerLevel / 10, 0
-		elseif playerLevel <= 7 then
-			return 1, (playerLevel - 3) / 4, 0
-		else
-			return (9 - playerLevel) / 2, 1, 0
-		end
 	end
-	local low, high = lows[zone], highs[zone]
 
 	if low <= 0 and high <= 0 then
-		-- City
+		-- City or level unknown
 		return 1, 1, 1
 	elseif playerLevel == low and playerLevel == high then
 		return 1, 1, 0
@@ -224,10 +228,19 @@ end
 
 function Tourist:GetFactionColor(zone)
 	if factions[zone] == (isHorde and "Alliance" or "Horde") then
+		-- Red
 		return 1, 0, 0
 	elseif factions[zone] == (isHorde and "Horde" or "Alliance") then
+		-- Green
 		return 0, 1, 0
+	elseif factions[zone] == "Sanctuary" then
+		-- Blue
+		return 0.41, 0.8, 0.94
+	elseif self:IsPvPZone(zone) then
+		-- Orange
+		return 1, 0.7, 0
 	else
+		-- Yellow
 		return 1, 1, 0
 	end
 end
@@ -489,8 +502,10 @@ local function mysort(a,b)
 		return true
 	else
 		local aval, bval = groupSizes[a], groupSizes[b]
-		if aval ~= bval then
-			return aval < bval
+		if aval and bval then
+			if aval ~= bval then
+				return aval < bval
+			end
 		end
 		aval, bval = lows[a], lows[b]
 		if aval ~= bval then
@@ -580,7 +595,7 @@ end
 
 local function zoneIter(_, position)
 	local k = next(zonesInstances, position)
-	while k ~= nil and (types[k] == "Instance" or types[k] == "Battleground") do
+	while k ~= nil and (types[k] == "Instance" or types[k] == "Battleground" or types[k] == "Arena") do
 		k = next(zonesInstances, k)
 	end
 	return k
@@ -594,7 +609,7 @@ end
 
 local function instanceIter(_, position)
 	local k = next(zonesInstances, position)
-	while k ~= nil and (types[k] ~= "Instance" and types[k] ~= "Battleground") do
+	while k ~= nil and (types[k] ~= "Instance" and types[k] ~= "Battleground" and types[k] ~= "Arena") do
 		k = next(zonesInstances, k)
 	end
 	return k
@@ -618,6 +633,20 @@ function Tourist:IterateBattlegrounds()
 		initZonesInstances()
 	end
 	return bgIter, nil, nil
+end
+
+local function arIter(_, position)
+	local k = next(zonesInstances, position)
+	while k ~= nil and types[k] ~= "Arena" do
+		k = next(zonesInstances, k)
+	end
+	return k
+end
+function Tourist:IterateArenas()
+	if initZonesInstances then
+		initZonesInstances()
+	end
+	return arIter, nil, nil
 end
 
 local function pvpIter(_, position)
@@ -668,6 +697,20 @@ if isHorde then
 else
 	Tourist.IterateFriendly = Tourist.IterateAlliance
 	Tourist.IterateHostile = Tourist.IterateHorde
+end
+
+local function sanctIter(_, position)
+	local k = next(zonesInstances, position)
+	while k ~= nil and factions[k] ~= "Sanctuary" do
+		k = next(zonesInstances, k)
+	end
+	return k
+end
+function Tourist:IterateSanctuaries()
+	if initZonesInstances then
+		initZonesInstances()
+	end
+	return sanctIter, nil, nil
 end
 
 local function contestedIter(_, position)
@@ -768,21 +811,30 @@ end
 
 function Tourist:IsInstance(zone)
 	local t = types[zone]
-	return t == "Instance" or t == "Battleground"
+	return t == "Instance" or t == "Battleground" or t == "Arena"
 end
 
 function Tourist:IsZone(zone)
 	local t = types[zone]
-	return t ~= "Instance" and t ~= "Battleground" and t ~= "Transport"
+	return t ~= "Instance" and t ~= "Battleground" and t ~= "Transport" and t ~= "Arena"
 end
 
 function Tourist:GetComplex(zone)
 	return complexes[zone]
 end
 
+function Tourist:GetType(zone)
+	return types[zone] or "Zone"
+end
+
 function Tourist:IsZoneOrInstance(zone)
 	local t = types[zone]
 	return t and t ~= "Transport"
+end
+
+function Tourist:IsTransport(zone)
+	local t = types[zone]
+	return t == "Transport"
 end
 
 function Tourist:IsBattleground(zone)
@@ -821,6 +873,10 @@ else
 	Tourist.IsHostile = Tourist.IsHorde
 end
 
+function Tourist:IsSanctuary(zone)
+	return factions[zone] == "Sanctuary"
+end
+
 function Tourist:IsContested(zone)
 	return not factions[zone]
 end
@@ -845,6 +901,10 @@ function Tourist:IsInNorthrend(zone)
 	return continents[zone] == Northrend
 end
 
+function Tourist:IsInTheMaelstrom(zone)
+	return continents[zone] == The_Maelstrom
+end
+
 function Tourist:GetInstanceGroupSize(instance)
 	return groupSizes[instance] or 0
 end
@@ -861,7 +921,19 @@ function Tourist:GetZoneFromTexture(texture)
 	if not texture then
 		return BZ["Azeroth"]
 	end
-	return textures_rev[texture]
+	local zone = textures_rev[texture]
+	if zone then 
+		return zone
+	else
+		-- Might be phased terrain, look for "_terrain<number>" postfix
+		local pos = string.find(texture, "_terrain")
+		if pos then
+			-- Remove the postfix from the texture name
+			texture = string.sub(texture, 0, pos - 1)
+			return textures_rev[texture]
+		end
+	end
+	return nil
 end
 
 function Tourist:GetEnglishZoneFromTexture(texture)
@@ -871,6 +943,17 @@ function Tourist:GetEnglishZoneFromTexture(texture)
 	local zone = textures_rev[texture]
 	if zone then
 		return BZR[zone]
+	else
+		-- Might be phased terrain, look for "_terrain<number>" postfix
+		local pos = string.find(texture, "_terrain")
+		if pos then
+			-- Remove the postfix from the texture name
+			texture = string.sub(texture, 0, pos - 1)
+			zone = textures_rev[texture]
+			if zone then
+				return BZR[zone]
+			end
+		end
 	end
 	return nil
 end
@@ -879,7 +962,7 @@ function Tourist:GetEntrancePortalLocation(instance)
 	return entrancePortals_zone[instance], entrancePortals_x[instance], entrancePortals_y[instance]
 end
 
-local inf = 1/0
+local inf = math.huge
 local stack = setmetatable({}, {__mode='k'})
 local function iterator(S)
 	local position = S['#'] - 1
@@ -1043,11 +1126,12 @@ do
 	local BOOTYBAY_RATCHET_BOAT = string.format(X_Y_BOAT, BZ["Booty Bay"], BZ["Ratchet"])
 	local MENETHIL_THERAMORE_BOAT = string.format(X_Y_BOAT, BZ["Menethil Harbor"], BZ["Theramore Isle"])
 	local MENETHIL_HOWLINGFJORD_BOAT = string.format(X_Y_BOAT, BZ["Menethil Harbor"], BZ["Howling Fjord"])
-	local AUBERDINE_DARNASSUS_BOAT = string.format(X_Y_BOAT, BZ["Auberdine"], BZ["Darnassus"])
-	local AUBERDINE_AZUREMYST_BOAT = string.format(X_Y_BOAT, BZ["Auberdine"], BZ["Azuremyst Isle"])
+	local DARNASSUS_EXODAR_PORTAL = string.format(X_Y_PORTAL, BZ["Darnassus"], BZ["The Exodar"])
+	local EXODAR_DARNASSUS_PORTAL = string.format(X_Y_PORTAL, BZ["The Exodar"], BZ["Darnassus"])
+	local TELDRASSIL_AZUREMYST_BOAT = string.format(X_Y_BOAT, BZ["Teldrassil"], BZ["Azuremyst Isle"])
+	local TELDRASSIL_STORMWIND_BOAT = string.format(X_Y_BOAT, BZ["Teldrassil"], BZ["Stormwind City"])
 	local DARNASSUS_BLASTEDLANDS_PORTAL = string.format(X_Y_PORTAL, BZ["Darnassus"], BZ["Blasted Lands"])
 	local EXODAR_BLASTEDLANDS_PORTAL = string.format(X_Y_PORTAL, BZ["The Exodar"], BZ["Blasted Lands"])
-	local STORMWIND_AUBERDINE_BOAT = string.format(X_Y_BOAT, BZ["Stormwind City"], BZ["Auberdine"])
 	local STORMWIND_BOREANTUNDRA_BOAT = string.format(X_Y_BOAT, BZ["Stormwind City"], BZ["Borean Tundra"])
 	local STORMWIND_BLASTEDLANDS_PORTAL = string.format(X_Y_PORTAL, BZ["Stormwind City"], BZ["Blasted Lands"])
 	local IRONFORGE_BLASTEDLANDS_PORTAL = string.format(X_Y_PORTAL, BZ["Ironforge"], BZ["Blasted Lands"])
@@ -1062,38 +1146,39 @@ do
 	local THUNDERBLUFF_BLASTEDLANDS_PORTAL = string.format(X_Y_PORTAL, BZ["Thunder Bluff"], BZ["Blasted Lands"])
 	local SILVERMOON_UNDERCITY_TELEPORT = string.format(X_Y_TELEPORT, BZ["Silvermoon City"], BZ["Undercity"])
 	local SILVERMOON_BLASTEDLANDS_PORTAL = string.format(X_Y_PORTAL, BZ["Silvermoon City"], BZ["Blasted Lands"])
---	local SHATTRATH_IRONFORGE_PORTAL = string.format(X_Y_PORTAL, BZ["Shattrath City"], BZ["Ironforge"])
---	local SHATTRATH_STORMWIND_PORTAL = string.format(X_Y_PORTAL, BZ["Shattrath City"], BZ["Stormwind City"])
---	local SHATTRATH_DARNASSUS_PORTAL = string.format(X_Y_PORTAL, BZ["Shattrath City"], BZ["Darnassus"])
---	local SHATTRATH_ORGRIMMAR_PORTAL = string.format(X_Y_PORTAL, BZ["Shattrath City"], BZ["Orgrimmar"])
---	local SHATTRATH_THUNDERBLUFF_PORTAL = string.format(X_Y_PORTAL, BZ["Shattrath City"], BZ["Thunder Bluff"])
---	local SHATTRATH_UNDERCITY_PORTAL = string.format(X_Y_PORTAL, BZ["Shattrath City"], BZ["Undercity"])
---	local SHATTRATH_EXODAR_PORTAL = string.format(X_Y_PORTAL, BZ["Shattrath City"], BZ["The Exodar"])
---	local SHATTRATH_SILVERMOON_PORTAL = string.format(X_Y_PORTAL, BZ["Shattrath City"], BZ["Silvermoon City"])
 	local SHATTRATH_QUELDANAS_PORTAL = string.format(X_Y_PORTAL, BZ["Shattrath City"], BZ["Isle of Quel'Danas"])
 	local SHATTRATH_COT_PORTAL = string.format(X_Y_PORTAL, BZ["Shattrath City"], BZ["Caverns of Time"])
 	local MOAKI_UNUPE_BOAT = string.format(X_Y_BOAT, BZ["Dragonblight"], BZ["Borean Tundra"])
 	local MOAKI_KAMAGUA_BOAT = string.format(X_Y_BOAT, BZ["Dragonblight"], BZ["Howling Fjord"])
---	local DALARAN_IRONFORGE_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["Ironforge"])
---	local DALARAN_STORMWIND_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["Stormwind City"])
---	local DALARAN_DARNASSUS_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["Darnassus"])
---	local DALARAN_ORGRIMMAR_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["Orgrimmar"])
---	local DALARAN_THUNDERBLUFF_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["Thunder Bluff"])
---	local DALARAN_UNDERCITY_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["Undercity"])
---	local DALARAN_EXODAR_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["The Exodar"])
---	local DALARAN_SILVERMOON_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["Silvermoon City"])
---	local DALARAN_SHATTRATH_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["Shattrath City"])
 	local DALARAN_COT_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["Caverns of Time"])
 	local DALARAN_CRYSTALSONG_TELEPORT = string.format(X_Y_TELEPORT, BZ["Dalaran"], BZ["Crystalsong Forest"])
-
-
-
+	local ORGRIMMAR_TWILIGHTHIGHLANDS_PORTAL = string.format(X_Y_PORTAL, BZ["Orgrimmar"], BZ["Twilight Highlands"])
+	local ORGRIMMAR_MOUNTHYJAL_PORTAL = string.format(X_Y_PORTAL, BZ["Orgrimmar"], BZ["Mount Hyjal"])
+	local ORGRIMMAR_DEEPHOLM_PORTAL = string.format(X_Y_PORTAL, BZ["Orgrimmar"], BZ["Deepholm"])
+	local DEEPHOLM_ORGRIMMAR_PORTAL = string.format(X_Y_PORTAL, BZ["Deepholm"], BZ["Orgrimmar"])
+	local ORGRIMMAR_ULDUM_PORTAL = string.format(X_Y_PORTAL, BZ["Orgrimmar"], BZ["Uldum"])
+	local ORGRIMMAR_VASHJIR_PORTAL = string.format(X_Y_PORTAL, BZ["Orgrimmar"], BZ["Vashj'ir"])
+	local ORGRIMMAR_TOLBARAD_PORTAL = string.format(X_Y_PORTAL, BZ["Orgrimmar"], BZ["Tol Barad Peninsula"])
+	local TOLBARAD_ORGRIMMAR_PORTAL = string.format(X_Y_PORTAL, BZ["Tol Barad Peninsula"], BZ["Orgrimmar"])
+	local STORMWIND_TWILIGHTHIGHLANDS_PORTAL = string.format(X_Y_PORTAL, BZ["Stormwind City"], BZ["Twilight Highlands"])
+	local STORMWIND_MOUNTHYJAL_PORTAL = string.format(X_Y_PORTAL, BZ["Stormwind City"], BZ["Mount Hyjal"])
+	local STORMWIND_DEEPHOLM_PORTAL = string.format(X_Y_PORTAL, BZ["Stormwind City"], BZ["Deepholm"])
+	local DEEPHOLM_STORMWIND_PORTAL = string.format(X_Y_PORTAL, BZ["Deepholm"], BZ["Stormwind City"])
+	local STORMWIND_ULDUM_PORTAL = string.format(X_Y_PORTAL, BZ["Stormwind City"], BZ["Uldum"])
+	local STORMWIND_VASHJIR_PORTAL = string.format(X_Y_PORTAL, BZ["Stormwind City"], BZ["Vashj'ir"])
+	local STORMWIND_TOLBARAD_PORTAL = string.format(X_Y_PORTAL, BZ["Stormwind City"], BZ["Tol Barad Peninsula"])
+	local TOLBARAD_STORMWIND_PORTAL = string.format(X_Y_PORTAL, BZ["Tol Barad Peninsula"], BZ["Stormwind City"])
+	local HELLFIRE_ORGRIMMAR_PORTAL = string.format(X_Y_PORTAL, BZ["Hellfire Peninsula"], BZ["Orgrimmar"])
+	local HELLFIRE_STORMWIND_PORTAL = string.format(X_Y_PORTAL, BZ["Hellfire Peninsula"], BZ["Stormwind City"])
+	local DALARAN_ORGRIMMAR_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["Orgrimmar"])
+	local DALARAN_STORMWIND_PORTAL = string.format(X_Y_PORTAL, BZ["Dalaran"], BZ["Stormwind City"])
 
 	local zones = {}
 
 	zones[BZ["Eastern Kingdoms"]] = {
 		type = "Continent",
-		yards = 47714.278579261,
+--		yards = 47714.278579261,
+		yards = 40741.17907,
 		x_offset = 0,
 		y_offset = 0,
 		continent = Eastern_Kingdoms,
@@ -1138,15 +1223,6 @@ do
 		y_offset = 0,
 	}
 
-	zones[STORMWIND_AUBERDINE_BOAT] = {
-		paths = {
-			[BZ["Stormwind City"]] = true,
-			[BZ["Darkshore"]] = true,
-		},
-		faction = "Alliance",
-		type = "Transport",
-	}
-
 	zones[STORMWIND_BOREANTUNDRA_BOAT] = {
 		paths = {
 			[BZ["Stormwind City"]] = true,
@@ -1177,6 +1253,14 @@ do
 	zones[ORGRIMMAR_BLASTEDLANDS_PORTAL] = {
 		paths = {
 			[BZ["Blasted Lands"]] = true,
+		},
+		faction = "Horde",
+		type = "Transport",
+	}
+
+	zones[HELLFIRE_ORGRIMMAR_PORTAL] = {
+		paths = {
+			[BZ["Orgrimmar"]] = true,
 		},
 		faction = "Horde",
 		type = "Transport",
@@ -1214,6 +1298,26 @@ do
 		type = "Transport",
 	}
 
+	zones[HELLFIRE_STORMWIND_PORTAL] = {
+		paths = {
+			[BZ["Stormwind City"]] = true,
+		},
+		faction = "Alliance",
+		type = "Transport",
+	}
+
+	zones[DALARAN_STORMWIND_PORTAL] = {
+		paths = BZ["Stormwind City"],
+		faction = "Alliance",
+		type = "Transport",
+	}
+
+	zones[DALARAN_ORGRIMMAR_PORTAL] = {
+		paths = BZ["Orgrimmar"],
+		faction = "Horde",
+		type = "Transport",
+	}
+
 	zones[DARNASSUS_BLASTEDLANDS_PORTAL] = {
 		paths = {
 			[BZ["Blasted Lands"]] = true,
@@ -1230,6 +1334,26 @@ do
 		type = "Transport",
 	}
 
+	zones[DARNASSUS_EXODAR_PORTAL] = {
+		paths = {
+			[BZ["The Exodar"]] = true,
+		},
+		faction = "Alliance",
+		type = "Transport",
+	}
+	
+	zones[EXODAR_DARNASSUS_PORTAL] = {
+		paths = {
+			[BZ["Darnassus"]] = true,
+		},
+		faction = "Alliance",
+		type = "Transport",
+	}
+
+
+
+
+
 	zones[IRONFORGE_BLASTEDLANDS_PORTAL] = {
 		paths = {
 			[BZ["Blasted Lands"]] = true,
@@ -1238,19 +1362,19 @@ do
 		type = "Transport",
 	}
 
-	zones[AUBERDINE_AZUREMYST_BOAT] = {
+	zones[TELDRASSIL_STORMWIND_BOAT] = {
 		paths = {
-			[BZ["Darkshore"]] = true,
-			[BZ["Azuremyst Isle"]] = true,
+			[BZ["Teldrassil"]] = true,
+			[BZ["Stormwind City"]] = true,
 		},
 		faction = "Alliance",
 		type = "Transport",
 	}
 
-	zones[AUBERDINE_DARNASSUS_BOAT] = {
+	zones[TELDRASSIL_AZUREMYST_BOAT] = {
 		paths = {
-			[BZ["Darkshore"]] = true,
-			[BZ["Darnassus"]] = true,
+			[BZ["Teldrassil"]] = true,
+			[BZ["Azuremyst Isle"]] = true,
 		},
 		faction = "Alliance",
 		type = "Transport",
@@ -1259,7 +1383,7 @@ do
 	zones[BOOTYBAY_RATCHET_BOAT] = {
 		paths = {
 			[BZ["The Cape of Stranglethorn"]] = true,
-			[BZ["The Barrens"]] = true,
+			[BZ["Northern Barrens"]] = true,
 		},
 		type = "Transport",
 	}
@@ -1308,46 +1432,6 @@ do
 		faction = "Horde",
 		type = "Transport",
 	}
-
---	zones[SHATTRATH_DARNASSUS_PORTAL] = {
---		paths = BZ["Darnassus"],
---		type = "Transport",
---	}
-
---	zones[SHATTRATH_EXODAR_PORTAL] = {
---		paths = BZ["The Exodar"],
---		type = "Transport",
---	}
-
---	zones[SHATTRATH_IRONFORGE_PORTAL] = {
---		paths = BZ["Ironforge"],
---		type = "Transport",
---	}
-
---	zones[SHATTRATH_ORGRIMMAR_PORTAL] = {
---		paths = BZ["Orgrimmar"],
---		type = "Transport",
---	}
-
---	zones[SHATTRATH_SILVERMOON_PORTAL] = {
---		paths = BZ["Silvermoon City"],
---		type = "Transport",
---	}
-
---	zones[SHATTRATH_STORMWIND_PORTAL] = {
---		paths = BZ["Stormwind City"],
---		type = "Transport",
---	}
-
---	zones[SHATTRATH_THUNDERBLUFF_PORTAL] = {
---		paths = BZ["Thunder Bluff"],
---		type = "Transport",
---	}
-
---	zones[SHATTRATH_UNDERCITY_PORTAL] = {
---		paths = BZ["Undercity"],
---		type = "Transport",
---	}
 
 	zones[SHATTRATH_QUELDANAS_PORTAL] = {
 		paths = BZ["Isle of Quel'Danas"],
@@ -1419,59 +1503,144 @@ do
 		type = "Transport",
 	}
 
---	zones[DALARAN_IRONFORGE_PORTAL] = {
---		paths = BZ["Ironforge"],
---		type = "Transport",
---	}
-
---	zones[DALARAN_STORMWIND_PORTAL] = {
---		paths = BZ["Stormwind City"],
---		type = "Transport",
---	}
-
---	zones[DALARAN_DARNASSUS_PORTAL] = {
---		paths = BZ["Darnassus"],
---		type = "Transport",
---	}
-
---	zones[DALARAN_ORGRIMMAR_PORTAL] = {
---		paths = BZ["Orgrimmar"],
---		type = "Transport",
---	}
-
---	zones[DALARAN_THUNDERBLUFF_PORTAL] = {
---		paths = BZ["Thunder Bluff"],
---		type = "Transport",
---	}
-
---	zones[DALARAN_UNDERCITY_PORTAL] = {
---		paths = BZ["Undercity"],
---		type = "Transport",
---	}
-
---	zones[DALARAN_EXODAR_PORTAL] = {
---		paths = BZ["The Exodar"],
---		type = "Transport",
---	}
-
---	zones[DALARAN_SILVERMOON_PORTAL] = {
---		paths = BZ["Silvermoon City"],
---		type = "Transport",
---	}
-
---	zones[DALARAN_SHATTRATH_PORTAL] = {
---		paths = BZ["Shattrath City"],
---		type = "Transport",
---	}
-
 	zones[DALARAN_COT_PORTAL] = {
 		paths = BZ["Caverns of Time"],
 		type = "Transport",
 	}
 
+
+	zones[STORMWIND_TWILIGHTHIGHLANDS_PORTAL] = {
+		paths = {
+			[BZ["Twilight Highlands"]] = true,
+		},
+		faction = "Alliance",
+		type = "Transport",
+	}
+
+	zones[STORMWIND_MOUNTHYJAL_PORTAL] = {
+		paths = {
+			[BZ["Mount Hyjal"]] = true,
+		},
+		faction = "Alliance",
+		type = "Transport",
+	}
+
+	zones[STORMWIND_DEEPHOLM_PORTAL] = {
+		paths = {
+			[BZ["Deepholm"]] = true,
+		},
+		faction = "Alliance",
+		type = "Transport",
+	}
+
+	zones[DEEPHOLM_STORMWIND_PORTAL] = {
+		paths = {
+			[BZ["Stormwind City"]] = true,
+		},
+		faction = "Alliance",
+		type = "Transport",
+	}
+
+	zones[TOLBARAD_STORMWIND_PORTAL] = {
+		paths = {
+			[BZ["Stormwind City"]] = true,
+		},
+		faction = "Alliance",
+		type = "Transport",
+	}
+
+	zones[STORMWIND_ULDUM_PORTAL] = {
+		paths = {
+			[BZ["Uldum"]] = true,
+		},
+		faction = "Alliance",
+		type = "Transport",
+	}
+
+	zones[STORMWIND_VASHJIR_PORTAL] = {
+		paths = {
+			[BZ["Vashj'ir"]] = true,
+		},
+		faction = "Alliance",
+		type = "Transport",
+	}
+
+	zones[STORMWIND_TOLBARAD_PORTAL] = {
+		paths = {
+			[BZ["Tol Barad Peninsula"]] = true,
+		},
+		faction = "Alliance",
+		type = "Transport",
+	}
+
+	zones[ORGRIMMAR_TWILIGHTHIGHLANDS_PORTAL] = {
+		paths = {
+			[BZ["Twilight Highlands"]] = true,
+		},
+		faction = "Horde",
+		type = "Transport",
+	}
+
+	zones[ORGRIMMAR_MOUNTHYJAL_PORTAL] = {
+		paths = {
+			[BZ["Mount Hyjal"]] = true,
+		},
+		faction = "Horde",
+		type = "Transport",
+	}
+
+	zones[ORGRIMMAR_DEEPHOLM_PORTAL] = {
+		paths = {
+			[BZ["Deepholm"]] = true,
+		},
+		faction = "Horde",
+		type = "Transport",
+	}
+	
+	zones[DEEPHOLM_ORGRIMMAR_PORTAL] = {
+		paths = {
+			[BZ["Orgrimmar"]] = true,
+		},
+		faction = "Horde",
+		type = "Transport",
+	}
+
+	zones[TOLBARAD_ORGRIMMAR_PORTAL] = {
+		paths = {
+			[BZ["Orgrimmar"]] = true,
+		},
+		faction = "Horde",
+		type = "Transport",
+	}
+
+	zones[ORGRIMMAR_ULDUM_PORTAL] = {
+		paths = {
+			[BZ["Uldum"]] = true,
+		},
+		faction = "Horde",
+		type = "Transport",
+	}
+
+	zones[ORGRIMMAR_VASHJIR_PORTAL] = {
+		paths = {
+			[BZ["Vashj'ir"]] = true,
+		},
+		faction = "Horde",
+		type = "Transport",
+	}
+	
+	zones[ORGRIMMAR_TOLBARAD_PORTAL] = {
+		paths = {
+			[BZ["Tol Barad Peninsula"]] = true,
+		},
+		faction = "Horde",
+		type = "Transport",
+	}
+
 	zones[BZ["Alterac Valley"]] = {
+		low = 45,
+		high = 85,
 		continent = Eastern_Kingdoms,
---		paths = BZ["Alterac Mountains"],
 		paths = BZ["Hillsbrad Foothills"],
 		groupSize = 40,
 		type = "Battleground",
@@ -1479,17 +1648,20 @@ do
 	}
 
 	zones[BZ["Arathi Basin"]] = {
+		low = 10,
+		high = 85,
 		continent = Eastern_Kingdoms,
 		paths = BZ["Arathi Highlands"],
 		groupSize = 15,
 		type = "Battleground",
 		texture = "ArathiBasin",
---		fishing_min = 0, -- can't fish here
 	}
 
 	zones[BZ["Warsong Gulch"]] = {
+		low = 10,
+		high = 85,
 		continent = Kalimdor,
-		paths = isHorde and BZ["The Barrens"] or BZ["Ashenvale"],
+		paths = isHorde and BZ["Northern Barrens"] or BZ["Ashenvale"],
 		groupSize = 10,
 		type = "Battleground",
 		texture = "WarsongGulch",
@@ -1512,13 +1684,11 @@ do
 		continent = Eastern_Kingdoms,
 		paths = {
 			[BZ["Eversong Woods"]] = true,
---			[BZ["Undercity"]] = true,  -- replaced by Teleport
 			[SILVERMOON_UNDERCITY_TELEPORT] = true,
 			[SILVERMOON_BLASTEDLANDS_PORTAL] = true,
 		},
 		faction = "Horde",
 		type = "City",
---		fishing_min = 1,
 	}
 
 	zones[BZ["Stormwind City"]] = {
@@ -1528,9 +1698,15 @@ do
 			[BZ["Deeprun Tram"]] = true,
 			[BZ["The Stockade"]] = true,
 			[BZ["Elwynn Forest"]] = true,
-			[STORMWIND_AUBERDINE_BOAT] = true,
+			[TELDRASSIL_STORMWIND_BOAT] = true,
 			[STORMWIND_BOREANTUNDRA_BOAT] = true,
 			[STORMWIND_BLASTEDLANDS_PORTAL] = true,
+			[STORMWIND_TWILIGHTHIGHLANDS_PORTAL] = true,
+			[STORMWIND_MOUNTHYJAL_PORTAL] = true,
+			[STORMWIND_DEEPHOLM_PORTAL] = true,
+			[STORMWIND_ULDUM_PORTAL] = true,
+			[STORMWIND_VASHJIR_PORTAL] = true,
+			[STORMWIND_TOLBARAD_PORTAL] = true,
 		},
 		faction = "Alliance",
 		type = "City",
@@ -1539,9 +1715,9 @@ do
 
 	zones[BZ["Undercity"]] = {
 		continent = Eastern_Kingdoms,
+		instances = BZ["Ruins of Lordaeron"],
 		paths = {
 			[BZ["Tirisfal Glades"]] = true,
---			[BZ["Silvermoon City"]] = true,  -- replaced by Teleport
 			[SILVERMOON_UNDERCITY_TELEPORT] = true,
 			[UNDERCITY_BLASTEDLANDS_PORTAL] = true,
 		},
@@ -1552,7 +1728,7 @@ do
 
 	zones[BZ["Dun Morogh"]] = {
 		low = 1,
-		high = 12,
+		high = 10,
 		continent = Eastern_Kingdoms,
 		instances = BZ["Gnomeregan"],
 		paths = {
@@ -1567,7 +1743,7 @@ do
 
 	zones[BZ["Elwynn Forest"]] = {
 		low = 1,
-		high = 12,
+		high = 10,
 		continent = Eastern_Kingdoms,
 		instances = BZ["The Stockade"],
 		paths = {
@@ -1710,7 +1886,6 @@ do
 		continent = Eastern_Kingdoms,
 		instances = BZ["Alterac Valley"],
 		paths = {
---			[BZ["Alterac Mountains"]] = true, -- merged
 			[BZ["Alterac Valley"]] = true,
 			[BZ["The Hinterlands"]] = true,
 			[BZ["Arathi Highlands"]] = true,
@@ -1722,8 +1897,8 @@ do
 	}
 
 	zones[BZ["Wetlands"]] = {
-		low = 25,
-		high = 30,
+		low = 20,
+		high = 25,
 		continent = Eastern_Kingdoms,
 		paths = {
 			[BZ["Arathi Highlands"]] = true,
@@ -1734,20 +1909,6 @@ do
 		},
 		fishing_min = 150,
 	}
-
---	Merged with Hillsbrad Foothills
---	zones[BZ["Alterac Mountains"]] = {
---		low = 30,
---		high = 40,
---		continent = Eastern_Kingdoms,
---		instances = BZ["Alterac Valley"],
---		paths = {
---			[BZ["Western Plaguelands"]] = true,
---			[BZ["Alterac Valley"]] = true,
---			[BZ["Hillsbrad Foothills"]] = true,
---		},
---		fishing_min = 130,
---	}
 
 	zones[BZ["Arathi Highlands"]] = {
 		low = 25,
@@ -1767,8 +1928,10 @@ do
 		low = 25,
 		high = 35,
 		continent = Eastern_Kingdoms,
+		instances = BZ["Zul'Gurub"],
 		paths = {
 			[BZ["Duskwood"]] = true,
+			[BZ["Zul'Gurub"]] = true,
 			[ORGRIMMAR_GROMGOL_ZEPPELIN] = true,
 			[UNDERCITY_GROMGOL_ZEPPELIN] = true,
 			[BOOTYBAY_RATCHET_BOAT] = true,
@@ -1778,13 +1941,13 @@ do
 
 	zones[BZ["Northern Stranglethorn"]] = {
 		low = 25,
-		high = 35,
+		high = 30,
 		continent = Eastern_Kingdoms,
---		instances = BZ["Zul'Gurub"],  -- not an instance anymore
+		instances = BZ["Zul'Gurub"],
 		paths = {
---			[BZ["Zul'Gurub"]] = true,  -- now a subzone
 			[BZ["The Cape of Stranglethorn"]] = true,
 			[BZ["Duskwood"]] = true,
+			[BZ["Zul'Gurub"]] = true,
 			[ORGRIMMAR_GROMGOL_ZEPPELIN] = true,
 			[UNDERCITY_GROMGOL_ZEPPELIN] = true,
 		},
@@ -1803,7 +1966,7 @@ do
 	}
 
 	zones[BZ["Badlands"]] = {
-		low = 45,
+		low = 44,
 		high = 48,
 		continent = Eastern_Kingdoms,
 		instances = BZ["Uldaman"],
@@ -1817,7 +1980,7 @@ do
 
 	zones[BZ["Swamp of Sorrows"]] = {
 		low = 52,
-		high = 55,
+		high = 54,
 		continent = Eastern_Kingdoms,
 		instances = BZ["The Temple of Atal'Hakkar"],
 		paths = {
@@ -1842,8 +2005,8 @@ do
 	}
 
 	zones[BZ["Searing Gorge"]] = {
-		low = 48,
-		high = 50,
+		low = 47,
+		high = 51,
 		continent = Eastern_Kingdoms,
 		instances = {
 			[BZ["Blackrock Depths"]] = true,
@@ -1901,7 +2064,7 @@ do
 
 	zones[BZ["Blasted Lands"]] = {
 		low = 54,
-		high = 58,
+		high = 60,
 		continent = Eastern_Kingdoms,
 		paths = {
 			[BZ["The Dark Portal"]] = true,
@@ -1911,8 +2074,8 @@ do
 	}
 
 	zones[BZ["Burning Steppes"]] = {
-		low = 50,
-		high = 58,
+		low = 49,
+		high = 52,
 		continent = Eastern_Kingdoms,
 		instances = {
 			[BZ["Blackrock Depths"]] = true,
@@ -1940,7 +2103,6 @@ do
 			[BZ["Eastern Plaguelands"]] = true,
 			[BZ["Tirisfal Glades"]] = true,
 			[BZ["Scholomance"]] = true,
---			[BZ["Alterac Mountains"]] = true,
 			[BZ["Hillsbrad Foothills"]] = true,
 		},
 		fishing_min = 225,
@@ -1991,7 +2153,7 @@ do
 		groupSize = 5,
 		faction = "Alliance",
 		type = "Instance",
-		entrancePortal = { BZ["Stormwind City"], 40.6, 55.8 },
+		entrancePortal = { BZ["Stormwind City"], 50.5, 66.3 },
 	}
 
 	zones[BZ["Gnomeregan"]] = {
@@ -2162,17 +2324,6 @@ do
 		entrancePortal = { BZ["Searing Gorge"], 35.4, 84.4 },
 	}
 
---	zones[BZ["Zul'Gurub"]] = {
---		low = 60,
---		high = 62,
---		continent = Eastern_Kingdoms,
---		paths = BZ["Northern Stranglethorn"],
---		groupSize = 20,
---		type = "Instance",
---		fishing_min = 330,
---		entrancePortal = { BZ["Northern Stranglethorn"], 52.2, 17.1 },
---	}
-
 	zones[BZ["Karazhan"]] = {
 		low = 70,
 		high = 72,
@@ -2184,34 +2335,43 @@ do
 	}
 
 	zones[BZ["Zul'Aman"]] = {
-		low = 70,
-		high = 72,
+		low = 85,
+		high = 85,
 		continent = Eastern_Kingdoms,
 		paths = BZ["Ghostlands"],
-		groupSize = 10,
+		groupSize = 5,
 		type = "Instance",
 		entrancePortal = { BZ["Ghostlands"], 77.7, 63.2 },
 		fishing_min = 425,
+	}
+
+	zones[BZ["Zul'Gurub"]] = {
+		low = 85,
+		high = 85,
+		continent = Eastern_Kingdoms,
+		paths = BZ["Northern Stranglethorn"],
+		groupSize = 5,
+		type = "Instance",
+--		fishing_min = 330,
+		entrancePortal = { BZ["Northern Stranglethorn"], 52.2, 17.1 },
 	}
 
 	zones[BZ["Darnassus"]] = {
 		continent = Kalimdor,
 		paths = {
 			[BZ["Teldrassil"]] = true,
-			[AUBERDINE_DARNASSUS_BOAT] = true,
 			[DARNASSUS_BLASTEDLANDS_PORTAL] = true,
+			[DARNASSUS_EXODAR_PORTAL] = true,
 		},
 		faction = "Alliance",
 		type = "City",
 		fishing_min = 75,
 	}
 
---	zones[BZ["Hyjal"]] = {
---		continent = Kalimdor,
---	}
-
 	zones[BZ["Moonglade"]] = {
 		continent = Kalimdor,
+		low = 55,
+		high = 60,
 		paths = {
 			[BZ["Felwood"]] = true,
 			[BZ["Winterspring"]] = true,
@@ -2221,7 +2381,10 @@ do
 
 	zones[BZ["Orgrimmar"]] = {
 		continent = Kalimdor,
-		instances = BZ["Ragefire Chasm"],
+		instances = {
+			[BZ["Ragefire Chasm"]] = true,
+			[BZ["The Ring of Valor"]] = true,
+		},
 		paths = {
 			[BZ["Durotar"]] = true,
 			[BZ["Ragefire Chasm"]] = true,
@@ -2231,6 +2394,12 @@ do
 			[ORGRIMMAR_BOREANTUNDRA_ZEPPELIN] = true,
 			[ORGRIMMAR_THUNDERBLUFF_ZEPPELIN] = true,
 			[ORGRIMMAR_BLASTEDLANDS_PORTAL] = true,
+			[ORGRIMMAR_TWILIGHTHIGHLANDS_PORTAL] = true,
+			[ORGRIMMAR_MOUNTHYJAL_PORTAL] = true,
+			[ORGRIMMAR_DEEPHOLM_PORTAL] = true,
+			[ORGRIMMAR_ULDUM_PORTAL] = true,
+			[ORGRIMMAR_VASHJIR_PORTAL] = true,
+			[ORGRIMMAR_TOLBARAD_PORTAL] = true,
 		},
 		faction = "Horde",
 		type = "City",
@@ -2242,10 +2411,10 @@ do
 		paths = {
 			[BZ["Azuremyst Isle"]] = true,
 			[EXODAR_BLASTEDLANDS_PORTAL] = true,
+			[EXODAR_DARNASSUS_PORTAL] = true,
 		},
 		faction = "Alliance",
 		type = "City",
---		fishing_min = 1,
 	}
 
 	zones[BZ["Thunder Bluff"]] = {
@@ -2267,7 +2436,7 @@ do
 		paths = {
 			[BZ["The Exodar"]] = true,
 			[BZ["Bloodmyst Isle"]] = true,
-			[AUBERDINE_AZUREMYST_BOAT] = true,
+			[TELDRASSIL_AZUREMYST_BOAT] = true,
 		},
 		faction = "Alliance",
 		fishing_min = 25,
@@ -2275,13 +2444,10 @@ do
 
 	zones[BZ["Durotar"]] = {
 		low = 1,
-		high = 12,
+		high = 10,
 		continent = Kalimdor,
 		instances = BZ["Ragefire Chasm"],
 		paths = {
---			[ORGRIMMAR_UNDERCITY_ZEPPELIN] = true,  -- Zeppelins moved to Orgrimmar
---			[ORGRIMMAR_GROMGOL_ZEPPELIN] = true,
---			[ORGRIMMAR_BOREANTUNDRA_ZEPPELIN] = true,
 			[BZ["Northern Barrens"]] = true,
 			[BZ["Orgrimmar"]] = true,
 		},
@@ -2291,7 +2457,7 @@ do
 
 	zones[BZ["Mulgore"]] = {
 		low = 1,
-		high = 12,
+		high = 10,
 		continent = Kalimdor,
 		paths = {
 			[BZ["Thunder Bluff"]] = true,
@@ -2305,7 +2471,11 @@ do
 		low = 1,
 		high = 10,
 		continent = Kalimdor,
-		paths = BZ["Darnassus"],
+		paths = {
+			[BZ["Darnassus"]] = true,
+			[TELDRASSIL_AZUREMYST_BOAT] = true,
+			[TELDRASSIL_STORMWIND_BOAT] = true,
+		},
 		faction = "Alliance",
 		fishing_min = 25,
 	}
@@ -2324,42 +2494,11 @@ do
 		high = 20,
 		continent = Kalimdor,
 		paths = {
-			[AUBERDINE_DARNASSUS_BOAT] = true,
-			[AUBERDINE_AZUREMYST_BOAT] = true,
-			[STORMWIND_AUBERDINE_BOAT] = true,
 			[BZ["Ashenvale"]] = true,
 		},
 		faction = "Alliance",
 		fishing_min = 75,
 	}
-
---	Split up
---	zones[BZ["The Barrens"]] = {
---		low = 10,
---		high = 25,
---		continent = Kalimdor,
---		instances = {
---			[BZ["Razorfen Kraul"]] = true,
---			[BZ["Wailing Caverns"]] = true,
---			[BZ["Razorfen Downs"]] = true,
---			[BZ["Warsong Gulch"]] = isHorde and true or nil,
---		},
---		paths = {
---			[BZ["Thousand Needles"]] = true,
---			[BZ["Razorfen Kraul"]] = true,
---			[BZ["Ashenvale"]] = true,
---			[BZ["Durotar"]] = true,
---			[BZ["Wailing Caverns"]] = true,
---			[BOOTYBAY_RATCHET_BOAT] = true,
---			[BZ["Dustwallow Marsh"]] = true,
---			[BZ["Razorfen Downs"]] = true,
---			[BZ["Stonetalon Mountains"]] = true,
---			[BZ["Mulgore"]] = true,
---			[BZ["Warsong Gulch"]] = isHorde and true or nil,
---		},
---		faction = "Horde",
---		fishing_min = 20,
---	}
 
 	zones[BZ["Northern Barrens"]] = {
 		low = 10,
@@ -2376,7 +2515,7 @@ do
 			[BZ["Wailing Caverns"]] = true,
 			[BOOTYBAY_RATCHET_BOAT] = true,
 			[BZ["Warsong Gulch"]] = isHorde and true or nil,
-			[BZ["Stonetalon Mountains"]] = true,  -- TODO: check
+			[BZ["Stonetalon Mountains"]] = true,
 		},
 		faction = "Horde",
 		fishing_min = 75,
@@ -2388,14 +2527,12 @@ do
 		continent = Kalimdor,
 		instances = {
 			[BZ["Razorfen Kraul"]] = true,
-			[BZ["Razorfen Downs"]] = true,
 		},
 		paths = {
 			[BZ["Northern Barrens"]] = true,
 			[BZ["Thousand Needles"]] = true,
 			[BZ["Razorfen Kraul"]] = true,
 			[BZ["Dustwallow Marsh"]] = true,
-			[BZ["Razorfen Downs"]] = true,
 			[BZ["Stonetalon Mountains"]] = true,
 			[BZ["Mulgore"]] = true,
 		},
@@ -2408,7 +2545,7 @@ do
 		continent = Kalimdor,
 		paths = {
 			[BZ["Desolace"]] = true,
-			[BZ["Northern Barrens"]] = true,  -- TODO: check
+			[BZ["Northern Barrens"]] = true,
 			[BZ["Southern Barrens"]] = true,
 			[BZ["Ashenvale"]] = true,
 		},
@@ -2439,11 +2576,15 @@ do
 		low = 40,
 		high = 45,
 		continent = Kalimdor,
+		instances = {
+			[BZ["Razorfen Downs"]] = true,
+		},
 		paths = {
 			[BZ["Feralas"]] = true,
 			[BZ["Southern Barrens"]] = true,
 			[BZ["Tanaris"]] = true,
 			[BZ["Dustwallow Marsh"]] = true,
+			[BZ["Razorfen Downs"]] = true,
 		},
 		fishing_min = 300,
 	}
@@ -2498,6 +2639,10 @@ do
 			[BZ["The Black Morass"]] = true,
 			[BZ["Hyjal Summit"]] = true,
 			[BZ["The Culling of Stratholme"]] = true,
+			[BZ["End Time"]] = true,
+			[BZ["Hour of Twilight"]] = true,
+			[BZ["Well of Eternity"]] = true,
+			[BZ["Dragon Soul"]] = true,
 		},
 		paths = {
 			[BZ["Thousand Needles"]] = true,
@@ -2516,6 +2661,7 @@ do
 		paths = BZ["Ashenvale"],
 		paths = BZ["Orgrimmar"],
 		fishing_min = 75,
+		faction = "Horde",
 	}
 
 	zones[BZ["Felwood"]] = {
@@ -2545,14 +2691,9 @@ do
 		low = 55,
 		high = 60,
 		continent = Kalimdor,
-		instances = {
-			[BZ["Ahn'Qiraj"]] = true,
-			[BZ["Ruins of Ahn'Qiraj"]] = true,
-		},
 		paths = {
 			[BZ["Ruins of Ahn'Qiraj"]] = true,
 			[BZ["Un'Goro Crater"]] = true,
-			[BZ["Ahn'Qiraj"]] = true,
 			[BZ["Ahn'Qiraj: The Fallen Kingdom"]] = true,
 		},
 		type = "PvP Zone",
@@ -2586,12 +2727,12 @@ do
 		low = 15,
 		high = 25,
 		continent = Kalimdor,
-		paths = BZ["The Barrens"],
+		paths = BZ["Northern Barrens"],
 		groupSize = 5,
 		faction = "Horde",
 		type = "Instance",
 		fishing_min = 75,
-		entrancePortal = { BZ["The Barrens"], 52.40, 55.20 },
+		entrancePortal = { BZ["Northern Barrens"], 42.1, 66.5 },
 	}
 
 	zones[BZ["Blackfathom Deeps"]] = {
@@ -2609,20 +2750,20 @@ do
 		low = 30,
 		high = 40,
 		continent = Kalimdor,
-		paths = BZ["The Barrens"],
+		paths = BZ["Southern Barrens"],
 		groupSize = 5,
 		type = "Instance",
-		entrancePortal = { BZ["The Barrens"], 40.6, 89.6 },
+		entrancePortal = { BZ["Southern Barrens"], 40.8, 94.5 },
 	}
 
 	zones[BZ["Razorfen Downs"]] = {
 		low = 40,
 		high = 50,
 		continent = Kalimdor,
-		paths = BZ["The Barrens"],
+		paths = BZ["Thousand Needles"],
 		groupSize = 5,
 		type = "Instance",
-		entrancePortal = { BZ["The Barrens"], 47, 88.1 },
+		entrancePortal = { BZ["Thousand Needles"], 47.5, 23.7 },
 	}
 
 	zones[BZ["Zul'Farrak"]] = {
@@ -2667,24 +2808,24 @@ do
 		entrancePortal = { BZ["Dustwallow Marsh"], 52, 76 },
 	}
 
-	zones[BZ["Ahn'Qiraj"]] = {
+	zones[BZ["Temple of Ahn'Qiraj"]] = {
 		low = 60,
-		high = 62,
+		high = 63,
 		continent = Kalimdor,
-		paths = BZ["Silithus"],
+		paths = BZ["Ahn'Qiraj: The Fallen Kingdom"],
 		groupSize = 40,
 		type = "Instance",
-		entrancePortal = { BZ["Silithus"], 29.3, 94 },
+		entrancePortal = { BZ["Ahn'Qiraj: The Fallen Kingdom"], 46.6, 7.4 },
 	}
 
 	zones[BZ["Ruins of Ahn'Qiraj"]] = {
 		low = 60,
-		high = 62,
+		high = 63,
 		continent = Kalimdor,
-		paths = BZ["Silithus"],
-		groupSize = 10,
+		paths = BZ["Ahn'Qiraj: The Fallen Kingdom"],
+		groupSize = 20,
 		type = "Instance",
-		entrancePortal = { BZ["Silithus"], 29.3, 94 },
+		entrancePortal = { BZ["Ahn'Qiraj: The Fallen Kingdom"], 58.9, 14.3 },
 	}
 
 	zones[BZ["Caverns of Time"]] = {
@@ -2696,6 +2837,10 @@ do
 			[BZ["The Black Morass"]] = true,
 			[BZ["Hyjal Summit"]] = true,
 			[BZ["The Culling of Stratholme"]] = true,
+			[BZ["End Time"]] = true,
+			[BZ["Hour of Twilight"]] = true,
+			[BZ["Well of Eternity"]] = true,
+			[BZ["Dragon Soul"]] = true,
 		},
 		paths = {
 			[BZ["Tanaris"]] = true,
@@ -2754,19 +2899,12 @@ do
 	zones[BZ["Shattrath City"]] = {
 		continent = Outland,
 		paths = {
---			[SHATTRATH_THUNDERBLUFF_PORTAL] = true,
---			[SHATTRATH_STORMWIND_PORTAL] = true,
---			[SHATTRATH_UNDERCITY_PORTAL] = true,
 			[BZ["Terokkar Forest"]] = true,
---			[SHATTRATH_SILVERMOON_PORTAL] = true,
---			[SHATTRATH_EXODAR_PORTAL] = true,
---			[SHATTRATH_DARNASSUS_PORTAL] = true,
---			[SHATTRATH_ORGRIMMAR_PORTAL] = true,
---			[SHATTRATH_IRONFORGE_PORTAL] = true,
 			[BZ["Nagrand"]] = true,
 			[SHATTRATH_QUELDANAS_PORTAL] = true,
 			--[SHATTRATH_COT_PORTAL] = true,
 		},
+		faction = "Sanctuary",
 		type = "City",
 	}
 
@@ -2803,6 +2941,8 @@ do
 			[BZ["The Dark Portal"]] = true,
 			[BZ["Terokkar Forest"]] = true,
 			[BZ["Hellfire Citadel"]] = true,
+			[HELLFIRE_ORGRIMMAR_PORTAL] = true,
+			[HELLFIRE_STORMWIND_PORTAL] = true,
 		},
 		type = "PvP Zone",
 		fishing_min = 375,
@@ -2844,7 +2984,7 @@ do
 			[BZ["Nagrand"]] = true,
 			[BZ["Hellfire Peninsula"]] = true,
 		},
---		type = "PvP Zone",
+		type = "PvP Zone",
 		fishing_min = 400,
 	}
 
@@ -2892,6 +3032,9 @@ do
 		low = 64,
 		high = 67,
 		continent = Outland,
+		instances = {
+			[BZ["Nagrand Arena"]] = true,
+		},
 		paths = {
 			[BZ["Zangarmarsh"]] = true,
 			[BZ["Shattrath City"]] = true,
@@ -2905,7 +3048,11 @@ do
 		low = 65,
 		high = 68,
 		continent = Outland,
-		instances = BZ["Gruul's Lair"],
+		instances = 
+		{
+			[BZ["Gruul's Lair"]] = true,
+			[BZ["Blade's Edge Arena"]] = true,
+		},
 		paths = {
 			[BZ["Netherstorm"]] = true,
 			[BZ["Zangarmarsh"]] = true,
@@ -2940,6 +3087,7 @@ do
 			[BZ["The Botanica"]] = true,
 			[BZ["The Arcatraz"]] = true,
 			[BZ["The Eye"]] = true,
+			[BZ["Eye of the Storm"]] = true,
 		},
 		paths = {
 			[BZ["Tempest Keep"]] = true,
@@ -3157,10 +3305,10 @@ do
 	}
 
 	zones[BZ["Eye of the Storm"]] = {
-		low = 61,
-		high = 70,
+		low = 35,
+		high = 85,
 		continent = Outland,
-		groupSize = 25,
+		groupSize = 15,
 		type = "Battleground",
 		texture = "NetherstormArena",
 	}
@@ -3229,24 +3377,22 @@ do
 		continent = Northrend,
 		paths = {
 			[BZ["The Violet Hold"]] = true,
---			[BZ["Crystalsong Forest"]] = true,  -- replaced by Teleport
 			[DALARAN_CRYSTALSONG_TELEPORT] = true,
---			[DALARAN_IRONFORGE_PORTAL] = true,
---			[DALARAN_STORMWIND_PORTAL] = true,
---			[DALARAN_DARNASSUS_PORTAL] = true,
---			[DALARAN_ORGRIMMAR_PORTAL] = true,
---			[DALARAN_THUNDERBLUFF_PORTAL] = true,
---			[DALARAN_UNDERCITY_PORTAL] = true,
---			[DALARAN_EXODAR_PORTAL] = true,
---			[DALARAN_SILVERMOON_PORTAL] = true,
---			[DALARAN_SHATTRATH_PORTAL] = true,
 			[DALARAN_COT_PORTAL] = true,
+			[DALARAN_STORMWIND_PORTAL] = true,
+			[DALARAN_ORGRIMMAR_PORTAL] = true,
 		},
-		instances = BZ["The Violet Hold"],
+		instances = {
+			[BZ["The Violet Hold"]] = true,
+			[BZ["Dalaran Arena"]] = true,
+		},
 		type = "City",
 		texture = "Dalaran",
+		faction = "Sanctuary",
 		fishing_min = 525,
 	}
+
+
 
 	zones[BZ["Plaguelands: The Scarlet Enclave"]] = {
 		low = 55,
@@ -3309,12 +3455,12 @@ do
 			[BZ["Utgarde Keep"]] = true,
 			[BZ["Utgarde Pinnacle"]] = true,
 		},
-		fishing_min = 380,
+		fishing_min = 475,
 	}
 
 	zones[BZ["Dragonblight"]] = {
 		low = 71,
-		high = 74,
+		high = 75,
 		continent = Northrend,
 		paths = {
 			[BZ["Borean Tundra"]] = true,
@@ -3333,6 +3479,7 @@ do
 			[BZ["Ahn'kahet: The Old Kingdom"]] = true,
 			[BZ["Naxxramas"]] = true,
 			[BZ["The Obsidian Sanctum"]] = true,
+			[BZ["Strand of the Ancients"]] = true,
 		},
 		fishing_min = 475,
 	}
@@ -3353,7 +3500,7 @@ do
 
 	zones[BZ["Zul'Drak"]] = {
 		low = 74,
-		high = 77,
+		high = 76,
 		continent = Northrend,
 		paths = {
 			[BZ["Dragonblight"]] = true,
@@ -3366,7 +3513,7 @@ do
 			[BZ["Gundrak"]] = true,
 			[BZ["Drak'Tharon Keep"]] = true,
 		},
-		fishing_min = 380,
+		fishing_min = 475,
 	}
 
 	zones[BZ["Sholazar Basin"]] = {
@@ -3382,7 +3529,6 @@ do
 		high = 80,
 		continent = Northrend,
 		paths = {
---			[BZ["Dalaran"]] = true,  -- replaced by Teleport
 			[DALARAN_CRYSTALSONG_TELEPORT] = true,
 			[BZ["Dragonblight"]] = true,
 			[BZ["Zul'Drak"]] = true,
@@ -3429,6 +3575,7 @@ do
 			[BZ["Pit of Saron"]] = true,
 			[BZ["Halls of Reflection"]] = true,
 			[BZ["Icecrown Citadel"]] = true,
+			[BZ["Isle of Conquest"]] = true,
 		},
 		fishing_min = 550,
 	}
@@ -3684,7 +3831,7 @@ do
 		groupSize = 10,
 		altGroupSize = 25,
 		type = "Instance",
-		--entrancePortal = { BZ["Wintergrasp"], 58, 45 }, -- TODO
+		entrancePortal = { BZ["Wintergrasp"], 50, 11.2 }, 
 	}
 
 	zones[BZ["The Ruby Sanctum"]] = {
@@ -3706,12 +3853,21 @@ do
 	}
 
 	zones[BZ["Strand of the Ancients"]] = {
-		low = 71,
-		high = 80,
+		low = 65,
+		high = 85,
 		continent = Northrend,
-		groupSize = 25,
+		groupSize = 15,
 		type = "Battleground",
 		texture = "StrandoftheAncients",
+	}
+	
+	zones[BZ["Isle of Conquest"]] = {
+		low = 75,
+		high = 85,
+		continent = Northrend,
+		groupSize = 40,
+		type = "Battleground",
+		texture = "IsleofConquest",
 	}
 
 	zones[BZ["Dalaran Arena"]] = {
@@ -3721,19 +3877,25 @@ do
 		type = "Arena",
 	}
 
+	zones[BZ["The Ring of Valor"]] = {
+		low = 80,
+		high = 80,
+		continent = Kalimdor,
+		type = "Arena",
+	}
 
 	-- Cataclysm zones
 	
 	zones[BZ["Mount Hyjal"]] = {
-		low = 78,
+		low = 80,
 		high = 82,
 		continent = Kalimdor,
 		paths = {
 			[BZ["Winterspring"]] = true,
 		},
---		instances = {
---			[BZ["The Firelands"]] = true,  -- TODO: enable after LibBabble-Zone update
---		},
+		instances = {
+			[BZ["Firelands"]] = true,
+		},
 		fishing_min = 575,
 	}
 	
@@ -3753,53 +3915,53 @@ do
 		fishing_min = 650,
 	}
 	
-	-- TODO: update
 	zones[BZ["Ahn'Qiraj: The Fallen Kingdom"]] = {
---		low = 85,
---		high = 85,
+		low = 60,
+		high = 63,
 		continent = Kalimdor,
 		paths = {
 			[BZ["Silithus"]] = true,
 		},
---		instances = {
---		},
---		fishing_min = 0,
+		instances = {
+			[BZ["Temple of Ahn'Qiraj"]] = true,
+			[BZ["Ruins of Ahn'Qiraj"]] = true,
+		},
 	}
 	
-	zones[BZ["Ruins of Gilneas"]] = {
+	zones[BZ["Gilneas"]] = {
 		low = 1,
 		high = 12,
 		continent = Eastern_Kingdoms,
-		paths = {
-			[BZ["Silverpine Forest"]] = true,
---			[BZ["Ruins of Gilneas City"]] = true,  -- TODO: enable after LibBabble-Zone update
-		},
-		faction = "Alliance",
-		fishing_min = 75,
-	}
-
-	zones[BZ["Gilneas City"]] = {
-		low = 1,
-		high = 5,
-		continent = Eastern_Kingdoms,
-		paths = {},
+		paths = {},  -- phased instance
 		faction = "Alliance",
 		fishing_min = 25,
 	}
 
--- TODO: enable after LibBabble-Zone update
---	zones[BZ["Ruins of Gilneas City"]] = {
---		low = 6,
---		high = 12,
---		continent = Eastern_Kingdoms,
---		paths = {
---			[BZ["Silverpine Forest"]] = true,
---			[BZ["Ruins of Gilneas"]] = true,
---		},
---		faction = "Alliance",
---		type = "City",
---		fishing_min = 75,
---	}
+	zones[BZ["Gilneas City"]] = {
+		low = 1,
+		high = 12,
+		continent = Eastern_Kingdoms,
+		paths = {},  -- phased instance
+		faction = "Alliance",
+	}
+
+	zones[BZ["Ruins of Gilneas"]] = {
+		continent = Eastern_Kingdoms,
+		paths = {
+			[BZ["Silverpine Forest"]] = true,
+			[BZ["Ruins of Gilneas City"]] = true,
+		},
+		fishing_min = 75,
+	}
+
+	zones[BZ["Ruins of Gilneas City"]] = {
+		continent = Eastern_Kingdoms,
+		paths = {
+			[BZ["Silverpine Forest"]] = true,
+			[BZ["Ruins of Gilneas"]] = true,
+		},
+		fishing_min = 75,
+	}
 
 	zones[BZ["Twilight Highlands"]] = {
 		low = 84,
@@ -3808,10 +3970,12 @@ do
 		instances = {
 			[BZ["Grim Batol"]] = true,
 			[BZ["The Bastion of Twilight"]] = true,
+			[BZ["Twin Peaks"]] = true,
 		},
 		paths = {
 			[BZ["Wetlands"]] = true,
 			[BZ["Grim Batol"]] = true,
+			[BZ["Twin Peaks"]] = true,
 		},
 		fishing_min = 650,
 	}
@@ -3833,13 +3997,15 @@ do
 		continent = Eastern_Kingdoms,
 		paths = {
 			[BZ["Tol Barad"]] = true,
+			[TOLBARAD_ORGRIMMAR_PORTAL] = true,
+			[TOLBARAD_STORMWIND_PORTAL] = true,
 		},
 		fishing_min = 675,
 	}
 
 
 	zones[BZ["Vashj'ir"]] = {
-		low = 78,
+		low = 80,
 		high = 82,
 		continent = Eastern_Kingdoms,
 		instances = {
@@ -3849,8 +4015,8 @@ do
 	}
 
 	zones[BZ["Kelp'thar Forest"]] = {
-		low = 78,
-		high = 80,
+		low = 80,
+		high = 81,
 		continent = Eastern_Kingdoms,
 		paths = {
 			[BZ["Shimmering Expanse"]] = true,
@@ -3859,8 +4025,8 @@ do
 	}
 
 	zones[BZ["Shimmering Expanse"]] = {
-		low = 79,
-		high = 81,
+		low = 80,
+		high = 82,
 		continent = Eastern_Kingdoms,
 		paths = {
 			[BZ["Kelp'thar Forest"]] = true,
@@ -3870,7 +4036,7 @@ do
 	}
 
 	zones[BZ["Abyssal Depths"]] = {
-		low = 80,
+		low = 81,
 		high = 82,
 		continent = Eastern_Kingdoms,
 		instances = {
@@ -3883,14 +4049,16 @@ do
 		fishing_min = 575,
 	}
 
-	zones[BZ["The Maelstrom"]] = {
+--	! Conflict with continent
+--	zones[BZ["The Maelstrom"]] = {
 --		low = ?,
 --		high = ?,
-		continent = The_Maelstrom,
+--		continent = The_Maelstrom,
 --		paths = {
 --		},
+--		faction = "Sanctuary",
 --		fishing_min = 0,
-	}
+--	}
 
 	zones[BZ["Deepholm"]] = {
 		low = 82,
@@ -3901,6 +4069,8 @@ do
 		},
 		paths = {
 			[BZ["The Stonecore"]] = true,
+			[DEEPHOLM_ORGRIMMAR_PORTAL] = true,
+			[DEEPHOLM_STORMWIND_PORTAL] = true,
 		},
 		fishing_min = 550,
 	}
@@ -3909,9 +4079,6 @@ do
 		low = 1,
 		high = 5,
 		continent = The_Maelstrom,
---		paths = {
---			[BZ["The Lost Isles"]] = true,
---		},
 		faction = "Horde",
 		fishing_min = 25,
 	}
@@ -3920,9 +4087,6 @@ do
 		low = 6,
 		high = 12,
 		continent = The_Maelstrom,
---		paths = {
---			[BZ["Kezan"]] = true,
---		},
 		faction = "Horde",
 		fishing_min = 25,
 	}
@@ -3935,17 +4099,16 @@ do
 --	Cataclysm instances
 
 
--- TODO: enable after LibBabble-Zone update
---	zones[BZ["The Firelands"]] = {
---		low = 85,
---		high = 85,
---		continent = Kalimdor,
---		paths = BZ["Mount Hyjal"],
---		groupSize = 10,
---		altGroupSize = 25,
---		type = "Instance",
---		entrancePortal = { BZ["Mount Hyjal"], 52, 76 },  -- TODO: coordinates
---	}
+	zones[BZ["Firelands"]] = {
+		low = 85,
+		high = 85,
+		continent = Kalimdor,
+		paths = BZ["Mount Hyjal"],
+		groupSize = 10,
+		altGroupSize = 25,
+		type = "Instance",
+		entrancePortal = { BZ["Mount Hyjal"], 47.3, 78.3 }, 
+	}
 
 	zones[BZ["Lost City of the Tol'vir"]] = {
 		low = 85,
@@ -3954,7 +4117,7 @@ do
 		paths = BZ["Uldum"],
 		groupSize = 5,
 		type = "Instance",
-		entrancePortal = { BZ["Uldum"], 53.86, 87.27 },  -- TODO: coordinates
+		entrancePortal = { BZ["Uldum"], 60.53, 64.24 },
 	}
 
 	zones[BZ["Halls of Origination"]] = {
@@ -3964,7 +4127,7 @@ do
 		paths = BZ["Uldum"],
 		groupSize = 5,
 		type = "Instance",
-		entrancePortal = { BZ["Uldum"], 53.86, 87.27 },  -- TODO: coordinates
+		entrancePortal = { BZ["Uldum"], 69.09, 52.95 },
 	}
 
 	zones[BZ["The Vortex Pinnacle"]] = {
@@ -3974,7 +4137,7 @@ do
 		paths = BZ["Uldum"],
 		groupSize = 5,
 		type = "Instance",
-		entrancePortal = { BZ["Uldum"], 53.86, 87.27 },  -- TODO: coordinates
+		entrancePortal = { BZ["Uldum"], 76.79, 84.51 },
 	}
 
 	zones[BZ["Throne of the Four Winds"]] = {
@@ -3985,7 +4148,7 @@ do
 		groupSize = 10,
 		altGroupSize = 25,
 		type = "Instance",
-		entrancePortal = { BZ["Uldum"], 52, 76 },  -- TODO: coordinates
+		entrancePortal = { BZ["Uldum"], 38.26, 80.66 },
 	}
 
 
@@ -3998,7 +4161,7 @@ do
 		},
 		groupSize = 5,
 		type = "Instance",
-		entrancePortal = { BZ["Searing Gorge"], 35.4, 84.4 },  -- TODO: coordinates
+		entrancePortal = { BZ["Searing Gorge"], 47.8, 69.1 },
 	}
 
 	zones[BZ["Blackwing Descent"]] = {
@@ -4013,7 +4176,7 @@ do
 		groupSize = 10,
 		altGroupSize = 25,
 		type = "Instance",
-		entrancePortal = { BZ["Burning Steppes"], 29.7, 37.5 },  -- TODO: coordinates
+--		entrancePortal = { BZ["Burning Steppes"], 29.7, 37.5 },  -- TODO: coordinates
 	}
 
 	zones[BZ["Grim Batol"]] = {
@@ -4023,7 +4186,7 @@ do
 		paths = BZ["Twilight Highlands"],
 		groupSize = 5,
 		type = "Instance",
-		entrancePortal = { BZ["Twilight Highlands"], 53.86, 87.27 },  -- TODO: coordinates
+		entrancePortal = { BZ["Twilight Highlands"], 19, 53.5 },
 	}
 
 	zones[BZ["The Bastion of Twilight"]] = {
@@ -4034,7 +4197,7 @@ do
 		groupSize = 10,
 		altGroupSize = 25,
 		type = "Instance",
-		entrancePortal = { BZ["Twilight Highlands"], 53.86, 87.27 },  -- TODO: coordinates
+		entrancePortal = { BZ["Twilight Highlands"], 33.8, 78.2 },
 	}
 
 	zones[BZ["Throne of the Tides"]] = {
@@ -4044,7 +4207,7 @@ do
 		paths = BZ["Abyssal Depths"],
 		groupSize = 5,
 		type = "Instance",
-		entrancePortal = { BZ["Abyssal Depths"], 53.86, 87.27 },  -- TODO: coordinates
+		entrancePortal = { BZ["Abyssal Depths"], 69.3, 25.2 },
 	}
 
 
@@ -4055,11 +4218,78 @@ do
 		paths = BZ["Deepholm"],
 		groupSize = 5,
 		type = "Instance",
-		entrancePortal = { BZ["Deepholm"], 53.86, 87.27 },  -- TODO: coordinates
+		entrancePortal = { BZ["Deepholm"], 47.70, 51.96 },
 	}
 
 
+--	4.3 Dungeons
 
+	zones[BZ["End Time"]] = {
+		low = 85,
+		high = 85,
+		continent = Kalimdor,
+		paths = BZ["Caverns of Time"],
+		groupSize = 5,
+		type = "Instance",
+		complex = BZ["Caverns of Time"],
+		entrancePortal = { BZ["Tanaris"], 66.2, 49.3 },  -- TODO: check
+	}
+
+	zones[BZ["Hour of Twilight"]] = {
+		low = 85,
+		high = 85,
+		continent = Kalimdor,
+		paths = BZ["Caverns of Time"],
+		groupSize = 5,
+		type = "Instance",
+		complex = BZ["Caverns of Time"],
+		entrancePortal = { BZ["Tanaris"], 66.2, 49.3 },  -- TODO: check
+	}
+
+	zones[BZ["Well of Eternity"]] = {
+		low = 85,
+		high = 85,
+		continent = Kalimdor,
+		paths = BZ["Caverns of Time"],
+		groupSize = 5,
+		type = "Instance",
+		complex = BZ["Caverns of Time"],
+		entrancePortal = { BZ["Tanaris"], 66.2, 49.3 },  -- TODO: check
+	}
+
+	zones[BZ["Dragon Soul"]] = {
+		low = 85,
+		high = 85,
+		continent = Kalimdor,
+		paths = BZ["Caverns of Time"],
+		groupSize = 10,
+		altGroupSize = 25,
+		type = "Instance",
+		complex = BZ["Caverns of Time"],
+		entrancePortal = { BZ["Tanaris"], 66.2, 49.3 },  -- TODO: check
+	}
+
+
+--	Cataclysm Battlegrounds
+
+	zones[BZ["The Battle for Gilneas"]] = {
+		low = 85,
+		high = 85,
+		continent = Eastern_Kingdoms,
+		groupSize = 10,
+		type = "Battleground",
+		texture = "TheBattleforGilneas",
+	}
+
+	zones[BZ["Twin Peaks"]] = {
+		low = 85,
+		high = 85,
+		continent = Eastern_Kingdoms,
+		paths = BZ["Twilight Highlands"],
+		groupSize = 10,
+		type = "Battleground",
+		texture = "TwinPeaks",  -- TODO: verify
+	}
 
 
 
@@ -4075,45 +4305,75 @@ do
 	
 	-- Lookup for zones that are on a sub-continent map and therefore have no own highlight on the continent map
 	-- Value is the name of the sub-continent map that will be searched instead of the continent map
-	local searchMaps = {
-		["Northern Stranglethorn"] = "Stranglethorn Vale",
-		["The Cape of Stranglethorn"] = "Stranglethorn Vale",
-		["Abyssal Depths"] = "Vashj'ir",
-		["Kelp'thar Forest"] = "Vashj'ir",
-		["Shimmering Expanse"] = "Vashj'ir",
-	}
+	local searchMaps = {}
+	searchMaps[BZ["Northern Stranglethorn"]] = BZ["Stranglethorn Vale"]
+	searchMaps[BZ["The Cape of Stranglethorn"]] = BZ["Stranglethorn Vale"]
+	searchMaps[BZ["Abyssal Depths"]] = BZ["Vashj'ir"]
+	searchMaps[BZ["Kelp'thar Forest"]] = BZ["Vashj'ir"]
+	searchMaps[BZ["Shimmering Expanse"]] = BZ["Vashj'ir"]
 	
+	-- The submaps have different sizes than the continent maps -> use (measured) value
+	-- in order to get a porpoer yards value for the zone maps.
+	local submapContinentYards = {}
+	submapContinentYards[BZ["Stranglethorn Vale"]] = 6600
+	submapContinentYards[BZ["Vashj'ir"]] = 6975
 	
 	-- Hack:
 	-- For the zones below, UpdateMapHighlight() does not return name and map data for the city icon on the continent map
 	-- Use hardcoded values as default; will be overwritten once the UpdateMapHighlight bug has been fixed - if ever
 	-- Note: the city highlights/icons on the zone maps can't be used because these return the name but no map data
 	-- TODO: determine values!
-	zones[BZ["Orgrimmar"]].yards = 0
-	zones[BZ["Orgrimmar"]].x_offset = 0
-	zones[BZ["Orgrimmar"]].y_offset = 0
+	
+	local kalimdorYards = zones[BZ["Kalimdor"]].yards
+	local eastkingYards = zones[BZ["Eastern Kingdoms"]].yards
+	local northrendYards = zones[BZ["Northrend"]].yards
+	local maelstromYards = zones[BZ["The Maelstrom"]].yards
+	
+	zones[BZ["Orgrimmar"]].yards = 1739.375
+	zones[BZ["Orgrimmar"]].x_offset = 0 * kalimdorYards
+	zones[BZ["Orgrimmar"]].y_offset = 0 * kalimdorYards * 2/3
 	zones[BZ["Orgrimmar"]].texture = "Orgrimmar"
 
-	zones[BZ["Darnassus"]].yards = 0
-	zones[BZ["Darnassus"]].x_offset = 0
-	zones[BZ["Darnassus"]].y_offset = 0
+	zones[BZ["Darnassus"]].yards = 1539.58337402344
+	zones[BZ["Darnassus"]].x_offset = 0 * kalimdorYards
+	zones[BZ["Darnassus"]].y_offset = 0 * kalimdorYards * 2/3
 	zones[BZ["Darnassus"]].texture = "Darnassus"
 
-	zones[BZ["Stormwind City"]].yards = 0
-	zones[BZ["Stormwind City"]].x_offset = 0
-	zones[BZ["Stormwind City"]].y_offset = 0
+	zones[BZ["Stormwind City"]].yards = 1737.499958992
+	zones[BZ["Stormwind City"]].x_offset = 0 * eastkingYards
+	zones[BZ["Stormwind City"]].y_offset = 0 * eastkingYards * 2/3
 	zones[BZ["Stormwind City"]].texture = "StormwindCity"
 
-	zones[BZ["Dalaran"]].yards = 0
-	zones[BZ["Dalaran"]].x_offset = 0
-	zones[BZ["Dalaran"]].y_offset = 0
+	zones[BZ["Dalaran"]].yards = 830.015014648438
+	zones[BZ["Dalaran"]].x_offset = 0 * northrendYards
+	zones[BZ["Dalaran"]].y_offset = 0 * northrendYards * 2/3
 	zones[BZ["Dalaran"]].texture = "Dalaran"
 
-	-- disbled until update of LibBabble-Zone
---	zones[BZ["Ruins of Gilneas City"]].yards = 0
---	zones[BZ["Ruins of Gilneas City"]].x_offset = 0
---	zones[BZ["Ruins of Gilneas City"]].y_offset = 0
---	zones[BZ["Ruins of Gilneas City"]].texture = "RuinsOfGilneasCity"  -- to be verified
+	zones[BZ["Ruins of Gilneas City"]].yards = 889.583251953125
+	zones[BZ["Ruins of Gilneas City"]].x_offset = 0 * eastkingYards
+	zones[BZ["Ruins of Gilneas City"]].y_offset = 0 * eastkingYards * 2/3
+	zones[BZ["Ruins of Gilneas City"]].texture = "RuinsofGilneasCity"
+
+	zones[BZ["Kezan"]].yards = 1352.08319091797
+	zones[BZ["Kezan"]].x_offset = 0 * maelstromYards
+	zones[BZ["Kezan"]].y_offset = 0 * maelstromYards * 2/3
+	zones[BZ["Kezan"]].texture = "Kezan"
+
+	zones[BZ["The Lost Isles"]].yards = 4514.5830078125
+	zones[BZ["The Lost Isles"]].x_offset = 0 * maelstromYards
+	zones[BZ["The Lost Isles"]].y_offset = 0 * maelstromYards * 2/3
+	zones[BZ["The Lost Isles"]].texture = "TheLostIsles"
+
+	zones[BZ["Deepholm"]].yards = 5099.99987792969
+	zones[BZ["Deepholm"]].x_offset = 0 * maelstromYards
+	zones[BZ["Deepholm"]].y_offset = 0 * maelstromYards * 2/3
+	zones[BZ["Deepholm"]].texture = "Deepholm"
+	
+	zones[BZ["Gilneas"]].yards = 3145.83325195312
+	zones[BZ["Gilneas"]].x_offset = 0 * eastkingYards
+	zones[BZ["Gilneas"]].y_offset = 0 * eastkingYards * 2/3
+	zones[BZ["Gilneas"]].texture = "Gilneas"
+	
 	-- end hack
 
 
@@ -4133,6 +4393,7 @@ do
 			zoneIDs[zoneNames[_]] = _
 		end
 		
+		
 		for _ = 1, #zoneNames do
 			local x, y
 			local name, fileName, texPctX, texPctY, texX, texY, scrollX, scrollY
@@ -4146,13 +4407,16 @@ do
 				if zoneID then
 					-- Set map to zone map
 					SetMapZoom(continentID, zoneID)
+					-- Get searchMap 'continent' size
+					continentYards = submapContinentYards[searchMap]
+					--trace( "continentYards for "..tostring(searchMap).." = "..tostring(continentYards) )
 				end
 			end
 			
-			-- Search the map
-			local finish = GetTime() + 0.1	
+			local scansDone = 0	
 			repeat
-				if finish < GetTime() then
+				scansDone = scansDone + 1
+				if scansDone >= 10000 then
 					-- Timeout
 					name = nil
 					break
@@ -4161,17 +4425,12 @@ do
 				name, fileName, texPctX, texPctY, texX, texY, scrollX, scrollY = UpdateMapHighlight(x, y)
 			until name and not doneZones[name] and name == zoneNames[_]  -- do not stop searching until we have a match on zonename
 
-			if zoneID then
-				-- Revert map to current continent map for next zoneName lookup
-				SetMapZoom(continentID)
-			end
-			
 			if name then
 				if fileName then
 					-- UpdateMapHighlight() returned the zone name and data for the texture
 					doneZones[name] = true
 
-					-- Not sure what this is for. Might have to be expanded for new zones?
+					-- TODO: expand for new zones?
 					if fileName == "EversongWoods" or fileName == "Ghostlands" or fileName == "Sunwell" or fileName == "SilvermoonCity" then
 						scrollX = scrollX - 0.00168
 						scrollY = scrollY + 0.01
@@ -4194,8 +4453,15 @@ do
 				-- See hack, above					
 				trace("! Tourist: Highlight not found for "..tostring(continentName).."["..tostring(_).."] = "..tostring(zoneNames[_]))
 			end 
+			
+			if zoneID then
+				-- Revert map to current continent map for next zoneName lookup
+				SetMapZoom(continentID)
+				continentYards = zones[continentName].yards
+			end
 		end
 	end
+	
 	SetMapToCurrentZone()
 
 	for k,v in pairs(zones) do	
